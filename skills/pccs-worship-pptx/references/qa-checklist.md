@@ -18,7 +18,8 @@ Delivery is blocked until all applicable checks pass.
 
 - [ ] `scripts/validate_slide_data.py` passes.
 - [ ] No repeat shorthand or vague references remain.
-- [ ] Each performed section is represented exactly once in sequence; multipage sections share one performance index.
+- [ ] Each performed section is represented exactly once in sequence; multipage sections share one `performance_index`, while a grouped ending page uses consecutive `performance_indexes`.
+- [ ] Consecutive one-line `End*2` or `End*3` repetitions are combined on one page when they fit, with one identical visible line per performance.
 - [ ] Lyric pages have at most three lines and no punctuation.
 - [ ] Single spaces divide phrases.
 

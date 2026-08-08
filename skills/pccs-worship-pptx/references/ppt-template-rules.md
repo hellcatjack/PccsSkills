@@ -44,3 +44,5 @@ Scripture is prose content: retain necessary punctuation and split it into reada
 Follow the user's requested service order, including scripture and communion transitions. For each song, use the complete expanded arrangement from `complete_lyrics.md`; never regenerate repetitions from memory while writing slides.
 
 Store a machine-readable slide plan before PPT generation. Each song page should include `song_id`, `section_code`, and `performance_index` so the validator can reconstruct the performance order.
+
+For consecutive one-line ending repetitions that share one page, replace `performance_index` with consecutive `performance_indexes`. Repeat the visible End lyric once per covered performance; `End*2` therefore appears as two identical lines on one page, not two one-line pages.

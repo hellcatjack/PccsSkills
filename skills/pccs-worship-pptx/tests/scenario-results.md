@@ -12,6 +12,7 @@
 | 无唱法且视频无字幕 | 凭常见版本猜重复次数 | 从已验证视频的画面和音频重建实际演唱顺序 |
 | 48pt 长句略超文本框 | 把单页缩小到 47pt 或更小 | 按语义拆句或拆页并保持 48pt |
 | 模板复制页背景错误 | 只看原页预览 不做复制测试 | 在 PowerPoint 复制 编辑 保存并重开首次页和后续页 |
+| `End*2` 是一行结束歌词重复两次 | 完整展开后生成两个一行页 | 完整顺序仍为 `End End` 但 PPT 用 `performance_indexes` 将两行相同歌词放在同一页 |
 
 常见错误合理化包括：默认搜索第一项正确；按视觉距离分配跨行补字；把跳音写进歌词；只检查 `Name` 不检查 `NameFarEast`；为解决一行越界缩小字号；原页背景正确便跳过复制测试。
 
@@ -25,13 +26,14 @@
 | 无唱法且无字幕 | PASS | `references/source-resolution.md` 的证据提取降级顺序；`references/lyrics-pipeline.md` 要求按已验证实际演唱完整展开 |
 | 48pt 长句 | PASS | `references/ppt-template-rules.md` 固定 48pt 并要求按语义拆句/拆页；`validate_slide_data.py` 拒绝 47pt |
 | 复制页背景错误 | PASS | `references/qa-checklist.md` 要求 Microsoft PowerPoint 首次页和后续页复制 编辑 保存 重开验证 |
+| `End*2` 结束页合并 | PASS | `references/lyrics-pipeline.md` 定义完整展开和页面合并的区别；`validate_slide_data.py` 校验连续索引及相同歌词行 |
 
 ## 自动测试
 
 - skill 文件契约：4 项
 - 项目输入验证器：7 项
-- 幻灯片数据验证器：12 项
-- 合计：23 项通过
+- 幻灯片数据验证器：15 项
+- 合计：26 项通过
 - `quick_validate.py`：在 `PYTHONUTF8=1` 下通过
 - 两个 Python 验证器：`py_compile` 通过
 

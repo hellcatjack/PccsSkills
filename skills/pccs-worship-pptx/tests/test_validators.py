@@ -246,6 +246,47 @@ class SlideDataValidatorTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual(4, json.loads(result.stdout)["performance_sections"])
 
+    def test_accepts_two_consecutive_end_performances_on_one_page(self):
+        payload = valid_slide_data()
+        grouped_end = copy.deepcopy(payload["pages"][2])
+        grouped_end.pop("performance_index")
+        grouped_end["performance_indexes"] = [3, 4]
+        grouped_end["lines"] = ["There is glory here", "There is glory here"]
+        payload["pages"] = payload["pages"][:2] + [grouped_end]
+
+        result = run_validator(SLIDE_VALIDATOR, payload)
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual(3, summary["page_count"])
+        self.assertEqual(4, summary["performance_sections"])
+
+    def test_rejects_nonconsecutive_grouped_end_indexes(self):
+        payload = valid_slide_data()
+        grouped_end = copy.deepcopy(payload["pages"][2])
+        grouped_end.pop("performance_index")
+        grouped_end["performance_indexes"] = [3, 5]
+        grouped_end["lines"] = ["There is glory here", "There is glory here"]
+        payload["pages"] = payload["pages"][:2] + [grouped_end]
+
+        result = run_validator(SLIDE_VALIDATOR, payload)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("consecutive", result.stderr.lower())
+
+    def test_rejects_grouped_end_when_lines_do_not_match_repetitions(self):
+        payload = valid_slide_data()
+        grouped_end = copy.deepcopy(payload["pages"][2])
+        grouped_end.pop("performance_index")
+        grouped_end["performance_indexes"] = [3, 4]
+        grouped_end["lines"] = ["There is glory here", "Different ending"]
+        payload["pages"] = payload["pages"][:2] + [grouped_end]
+
+        result = run_validator(SLIDE_VALIDATOR, payload)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("identical", result.stderr.lower())
+
     def test_rejects_page_sequence_that_disagrees_with_expansion(self):
         payload = valid_slide_data()
         payload["pages"][1]["section_code"] = "B"

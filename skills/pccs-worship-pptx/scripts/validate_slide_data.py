@@ -81,7 +81,7 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             normalized.append(token)
         expected_sequences[song_id] = normalized
 
-    performance_pages: dict[str, list[tuple[int, str, int, str]]] = {
+    performance_pages: dict[str, list[tuple[tuple[int, ...], str, int, str]]] = {
         song_id: [] for song_id in song_by_id
     }
     page_song_ids: list[str] = []
@@ -127,6 +127,7 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             song_id = page.get("song_id")
             section = page.get("section_code")
             performance_index = page.get("performance_index")
+            performance_indexes = page.get("performance_indexes")
             if song_id not in song_by_id:
                 errors.append(f"{label}.song_id does not reference a known song.")
                 continue
@@ -145,17 +146,53 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
                     f"{label}.section_code must be a valid section token for song pages."
                 )
                 continue
-            if (
-                not isinstance(performance_index, int)
-                or isinstance(performance_index, bool)
-                or performance_index < 1
-            ):
-                errors.append(
-                    f"{label}.performance_index must be a positive integer."
-                )
-                continue
+            indexes: tuple[int, ...]
+            if performance_indexes is not None:
+                if performance_index is not None:
+                    errors.append(
+                        f"{label} must use performance_index or performance_indexes, not both."
+                    )
+                    continue
+                if (
+                    not isinstance(performance_indexes, list)
+                    or len(performance_indexes) < 2
+                    or any(
+                        not isinstance(item, int)
+                        or isinstance(item, bool)
+                        or item < 1
+                        for item in performance_indexes
+                    )
+                ):
+                    errors.append(
+                        f"{label}.performance_indexes must contain at least two positive integers."
+                    )
+                    continue
+                indexes = tuple(performance_indexes)
+                if any(right != left + 1 for left, right in zip(indexes, indexes[1:])):
+                    errors.append(
+                        f"{label}.performance_indexes must be strictly consecutive."
+                    )
+                if section.strip().lower() != "end":
+                    errors.append(
+                        f"{label}.performance_indexes grouping is supported only for End sections."
+                    )
+                if len(lines) != len(indexes) or len(set(lines)) != 1:
+                    errors.append(
+                        f"{label} grouped End lines must be identical and match the number of performance_indexes."
+                    )
+            else:
+                if (
+                    not isinstance(performance_index, int)
+                    or isinstance(performance_index, bool)
+                    or performance_index < 1
+                ):
+                    errors.append(
+                        f"{label}.performance_index must be a positive integer."
+                    )
+                    continue
+                indexes = (performance_index,)
             performance_pages[song_id].append(
-                (performance_index, section.strip(), position, role)
+                (indexes, section.strip(), position, role)
             )
 
     song_blocks: list[str] = []
@@ -179,21 +216,22 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             errors.append(f"Song {song_id!r} must begin with a song_first page.")
         sequence: list[str] = []
         previous_index = 0
-        previous_section = ""
-        for performance_index, section, page_position, _ in entries:
-            if performance_index == previous_index:
-                if section != previous_section:
+        sections_by_index: dict[int, str] = {}
+        for performance_indexes, section, page_position, _ in entries:
+            for performance_index in performance_indexes:
+                if performance_index in sections_by_index:
+                    if section != sections_by_index[performance_index]:
+                        errors.append(
+                            f"pages[{page_position}] changes section_code within performance_index {performance_index}."
+                        )
+                    continue
+                if performance_index != previous_index + 1:
                     errors.append(
-                        f"pages[{page_position}] changes section_code within performance_index {performance_index}."
+                        f"pages[{page_position}] has non-consecutive performance_index {performance_index}."
                     )
-                continue
-            if performance_index != previous_index + 1:
-                errors.append(
-                    f"pages[{page_position}] has non-consecutive performance_index {performance_index}."
-                )
-            sequence.append(section)
-            previous_index = performance_index
-            previous_section = section
+                sequence.append(section)
+                sections_by_index[performance_index] = section
+                previous_index = performance_index
         actual_sequences[song_id] = sequence
         if sequence != expected_sequences.get(song_id, []):
             errors.append(

@@ -29,6 +29,19 @@ Output: V C End End
 
 Never use `同上`, `再唱`, `副歌重复`, or `End*2` in the complete expansion. If one section spans multiple slides, give those slides the same `performance_index`; increment the index only when the next performed section begins.
 
+### Group repeated endings in the slide plan
+
+The complete lyrics must still write every performance separately, but consecutive one-line End repetitions should share one slide when they fit the three-line limit:
+
+```text
+Arrangement input:     V C End*2
+Complete expansion:    V C End End
+Visible ending slide:  [ending line, ending line]
+Slide metadata:        performance_indexes: [3, 4]
+```
+
+Use `performance_indexes` only for consecutive occurrences of the same `End` section. Do not also set `performance_index` on that page. The number of identical visible ending lines must equal the number of grouped indexes. For `End*3`, place three identical one-line endings on one page. If one End occurrence contains multiple lines or grouping would exceed three lines, use the fewest pages that preserve complete End instances. An explicit user request for separate ending pages overrides this default.
+
 Performance annotations such as `跳音`, `轻唱`, `渐强`, or `男女轮唱` are not lyrics. Preserve them in project/audit notes and do not put them in visible lyric text unless explicitly requested.
 
 ## Normalize Text
@@ -67,7 +80,7 @@ Write `未发现需要修正的问题` when no differences exist. Do not silentl
 
 Generate it only from accepted audit decisions. Include both canonical section definitions and the fully expanded performance sequence. Write every performed instance in order; do not refer back to a previous instance.
 
-Before slide generation, verify that every expanded instance maps to exactly one canonical section and that no audit item remains unresolved without explicit user acceptance.
+Before slide generation, verify that every expanded instance maps to exactly one canonical section and exactly one slide-plan index. A page may cover several consecutive End instances through `performance_indexes`. No audit item may remain unresolved without explicit user acceptance.
 
 ## Correction Backflow
 

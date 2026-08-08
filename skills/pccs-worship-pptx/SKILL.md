@@ -25,7 +25,7 @@ Use the **Presentations** skill for every PPTX inspection, edit, render, and ver
 
 1. Normalize the user's chat input and run `scripts/validate_project.py PROJECT.json`.
 2. Resolve one concrete reference recording per song. When 歌词图片 exist, use direct visual recognition as the baseline and YouTube as verification. Without images, match the correct YouTube video from direct links, playlists, channels, or search hints before extracting lyrics.
-3. Build section definitions, interpret repeat signs and alternate endings, then fully expand the user's arrangement. Performance notes such as `C2跳音` change delivery, not visible lyrics, unless the recording proves a textual difference.
+3. Build section definitions, interpret repeat signs and alternate endings, then fully expand the user's arrangement. Keep `End*2` as `End End` in the complete lyrics, but place consecutive one-line End repetitions together on one slide when they fit the three-line limit. Record grouped occurrences with `performance_indexes`. Performance notes such as `C2跳音` change delivery, not visible lyrics, unless the recording proves a textual difference.
 4. Create `lyrics_audit.md` first. Record every discrepancy, source, decision, confidence level, and unresolved item.
 5. Create `complete_lyrics.md` only from accepted audit decisions. Convert Chinese to simplified Chinese and use `祢`/`祂` for references to God.
 6. Plan slide data and run `scripts/validate_slide_data.py SLIDES.json` before generating slides.
@@ -38,6 +38,7 @@ Use the **Presentations** skill for every PPTX inspection, edit, render, and ver
 - Stop for confirmation when several plausible recordings remain and matching confidence is low.
 - Do not create the PPTX before `lyrics_audit.md` and `complete_lyrics.md` are complete.
 - Do not use repeated-section shorthand in final lyrics or slide data.
+- Do not turn `End*2` into two one-line slides when both identical ending lines fit one page. The complete arrangement remains expanded as `End End`; only the slide plan groups them with `performance_indexes`.
 - Do not exceed three lyric lines, include lyric punctuation, use body text below `48pt`, or hide overflow with automatic shrinking.
 - Preserve the template background, PCCS logo, church identity, title color, and continuation-page song-name color.
 
