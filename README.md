@@ -1,9 +1,10 @@
 # PCCS Skills
 
-本仓库收录匹兹堡南区基督教会讲道视频制作项目中形成的可复用 Codex Skills。每个 Skill 均保留完整的 `SKILL.md`、参考资料、执行脚本、测试和 `agents/openai.yaml` 元数据。
+本仓库收录匹兹堡南区基督教会媒体与敬拜制作项目中形成的可复用 Codex Skills。每个 Skill 均保留完整的 `SKILL.md`、参考资料、执行脚本、测试和 `agents/openai.yaml` 元数据。
 
 ## Skills
 
+- `pccs-worship-pptx`：根据 PCCS 敬拜 PPTX 模板、歌曲演唱顺序、可选歌词图片及 YouTube 来源，生成经过歌词审计、可编辑并完成模板复制验证的敬拜歌词幻灯片。
 - `producing-single-camera-sermon-video`：将已含最终音轨的固定单机位牧师视频与本地 PPTX 合成为动态 1080p 讲道视频；内嵌音轨只允许码流复制，禁止重复处理。
 - `replacing-video-audio-track`：以视频时间轴为基准，对齐、截取并替换较长或起点不同的独立录音，同时保留非目标视频流。
 - `sermon-audio-restoration`：诊断并修复讲道音频中的啸叫、爆音、回声及人声音量不稳定问题，并保持严格的同步与时长约束。

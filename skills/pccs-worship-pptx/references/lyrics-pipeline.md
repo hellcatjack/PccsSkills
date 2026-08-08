@@ -1,0 +1,74 @@
+# Lyrics Pipeline
+
+## Source Priority
+
+Use this decision priority:
+
+1. User corrections and explicit performance arrangement.
+2. Semantically reviewed lyric-image transcription.
+3. Official lyrics or a verified video's description/captions.
+4. Clearly readable video lyric frames.
+5. Audio listening, ASR, or secondary lyric pages.
+
+Lower-priority evidence may repair missing or obviously wrong characters, but every change needs an audit entry.
+
+## Build Section Definitions
+
+Create canonical sections such as `V`, `V1`, `V2`, `C`, `C1`, `C2`, `B`, and `End`. Preserve meaningful phrase boundaries and spaces. Resolve repeat signs, first/second endings, and cross-line carry-over words before expanding the performance order.
+
+Example of a carry-over error: two characters printed near the end of C1 may fill the beginning of C2. Assign them by complete sentence meaning and repeat structure, not nearest OCR coordinates.
+
+## Expand the Arrangement
+
+Fully expand all repeats:
+
+```text
+Input:  V C End*2
+Output: V C End End
+```
+
+Never use `同上`, `再唱`, `副歌重复`, or `End*2` in the complete expansion. If one section spans multiple slides, give those slides the same `performance_index`; increment the index only when the next performed section begins.
+
+Performance annotations such as `跳音`, `轻唱`, `渐强`, or `男女轮唱` are not lyrics. Preserve them in project/audit notes and do not put them in visible lyric text unless explicitly requested.
+
+## Normalize Text
+
+- Convert Chinese lyrics to simplified Chinese.
+- Replace references to God with respectful `祢` and `祂`; do not change pronouns referring to people.
+- Preserve song-specific proper names and intentional non-Chinese words such as `Hi-Ne-Ni`.
+- Remove lyric punctuation only for final PPT lines.
+- Use single spaces to divide phrases; do not create repeated spaces.
+- Do not cut a semantic phrase merely to fill a slide.
+
+## Create `lyrics_audit.md`
+
+This file must exist before `complete_lyrics.md` or PPT generation. For each song record:
+
+```markdown
+## Song title
+
+- User arrangement:
+- Expanded arrangement:
+- Baseline source:
+- Reference recording and match confidence:
+- Sources actually accessed:
+
+| Location | Baseline | Evidence | Final | Reason | Status |
+|---|---|---|---|---|---|
+
+### Repeat and carry-over review
+### Unresolved items
+### Rejected ASR or link noise
+```
+
+Write `未发现需要修正的问题` when no differences exist. Do not silently omit an audit section.
+
+## Create `complete_lyrics.md`
+
+Generate it only from accepted audit decisions. Include both canonical section definitions and the fully expanded performance sequence. Write every performed instance in order; do not refer back to a previous instance.
+
+Before slide generation, verify that every expanded instance maps to exactly one canonical section and that no audit item remains unresolved without explicit user acceptance.
+
+## Correction Backflow
+
+If rendering or rehearsal reveals a lyric error, correct the audit decision first, regenerate `complete_lyrics.md`, regenerate slide data, and then regenerate the PPTX. Never patch only the visible slide while leaving the source documents inconsistent.
