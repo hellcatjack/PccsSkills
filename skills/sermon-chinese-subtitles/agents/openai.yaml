@@ -1,0 +1,6 @@
+interface:
+  display_name: "讲道高精度中文字幕"
+  short_description: "为指定讲道视频生成经文校正、逐词对齐并可审计的简体中文字幕"
+  default_prompt: "Use $sermon-chinese-subtitles to create high-precision Simplified-Chinese SRT subtitles for this specified sermon video."
+policy:
+  allow_implicit_invocation: true

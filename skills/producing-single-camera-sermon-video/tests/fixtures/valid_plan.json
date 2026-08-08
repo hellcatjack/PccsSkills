@@ -1,0 +1,91 @@
+{
+  "duration": 120.0,
+  "fps": 30,
+  "expectedFrames": 3600,
+  "transitions": {
+    "intro": 0.8,
+    "ordinary": 0.65,
+    "endingCover": 0.8
+  },
+  "intro": {
+    "fullUntil": 5.0,
+    "splitComplete": 5.8
+  },
+  "layout": {
+    "canvasWidth": 1920,
+    "canvasHeight": 1080,
+    "pptSplitWidth": 1560,
+    "pptSplitHeight": 878,
+    "pptSplitY": 101,
+    "pastorPanelWidth": 360,
+    "sourceVideoWidth": 2160,
+    "sourceVideoHeight": 3840,
+    "pastorCrop": {
+      "x": 700,
+      "y": 1140,
+      "width": 900,
+      "height": 2700
+    }
+  },
+  "pptSegments": [
+    {
+      "slide": 1,
+      "sourceStart": 0.0,
+      "sourceEnd": 20.0,
+      "targetStart": 0.0,
+      "targetEnd": 20.0,
+      "reason": "开场与主题建立"
+    },
+    {
+      "slide": 2,
+      "sourceStart": 20.0,
+      "sourceEnd": 40.0,
+      "targetStart": 20.0,
+      "targetEnd": 40.0,
+      "reason": "第一轮读经开始"
+    },
+    {
+      "slide": 3,
+      "sourceStart": 40.0,
+      "sourceEnd": 60.0,
+      "targetStart": 40.0,
+      "targetEnd": 60.0,
+      "reason": "第一轮读经完成"
+    },
+    {
+      "slide": 2,
+      "sourceStart": 60.0,
+      "sourceEnd": 90.0,
+      "targetStart": 60.0,
+      "targetEnd": 90.0,
+      "reason": "讲道回到第二页"
+    },
+    {
+      "slide": 3,
+      "sourceStart": 90.0,
+      "sourceEnd": 120.0,
+      "targetStart": 90.0,
+      "targetEnd": 120.0,
+      "reason": "讲道进入下一段"
+    }
+  ],
+  "fullScreenBlocks": [
+    {
+      "start": 20.0,
+      "end": 35.0,
+      "reason": "完整读经需要最大可读性"
+    },
+    {
+      "start": 65.0,
+      "end": 80.0,
+      "reason": "核心分点需要视觉强调"
+    }
+  ],
+  "endingCover": {
+    "start": 100.0,
+    "complete": 100.8,
+    "end": 120.0,
+    "mode": "left-cover-right-pastor",
+    "coverSlide": 1
+  }
+}

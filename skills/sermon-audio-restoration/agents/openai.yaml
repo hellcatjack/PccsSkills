@@ -1,0 +1,4 @@
+interface:
+  display_name: "讲道人声音频修复"
+  short_description: "全面诊断并修复讲道录音缺陷，同时严格保护音视频时间轴同步"
+  default_prompt: "Use $sermon-audio-restoration to diagnose and safely restore this sermon audio without changing its timeline."

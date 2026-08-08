@@ -1,0 +1,4 @@
+interface:
+  display_name: "替换并同步视频音轨"
+  short_description: "将任意格式独立录音精确匹配、截取并安全替换视频中的目标音轨"
+  default_prompt: "Use $replacing-video-audio-track to align an external recording to a video and replace only the target audio stream."

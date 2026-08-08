@@ -1,0 +1,4 @@
+interface:
+  display_name: "制作单机位讲道视频"
+  short_description: "将已含最终音轨的单机位视频与 PPT 合成为专业动态讲道成片"
+  default_prompt: "Use $producing-single-camera-sermon-video to create a verified dynamic sermon video from one fixed-camera recording and one PPTX; keep the embedded audio unchanged by stream copy."
