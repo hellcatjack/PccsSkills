@@ -22,22 +22,23 @@ Use the template's first-song page for the first page of each song and its conti
 
 - Set every editable Chinese run to `KaiTi` in both `Name` and `NameFarEast`.
 - First page of each song: centered song title at exactly `54pt`.
-- Lyric and scripture body: exactly `48pt`.
+- Lyric body: exactly `48pt`.
+- Scripture body: default `48pt`. If the user explicitly requires one scripture slide, or one intact source line cannot fit at `48pt`, choose the largest fitting scripture size and record the exception. This exception never changes lyric sizing.
 - Continuation-page song-name size, weight, and position come from the template unless the user supplies a newer rule.
 - Do not switch lyric body sizes between slides.
-- Never use automatic font shrinking. Split phrases or add slides instead.
+- Never use automatic font shrinking. Select scripture exceptions explicitly and verify them by rendering.
 
 ## Content Layout
 
 - Put lyric/scripture content in the upper safe area so heads in the front rows do not block it.
-- Use at most three lyric lines per slide.
+- Use at most three lyric lines per slide. This limit does not apply to an explicitly requested scripture slide.
 - Keep each logical line as one paragraph and disable unwanted automatic wrapping.
 - Remove lyric punctuation; retain single spaces between lyric phrases.
 - Prefer two or three balanced lines. One-line pages are allowed for a meaningful ending or when combining would harm legibility.
 - If a 48pt line does not fit, split at a semantic phrase boundary. Do not reduce the font.
 - Song title, lyric body, logo, and church identity must not overlap or leave their intended bounds.
 
-Scripture is prose content: retain necessary punctuation and split it into readable 48pt pages while preserving verse meaning.
+For scripture, every canonical `source_lines` item must become exactly one PowerPoint paragraph. Do not merge, split, reorder, paraphrase, or silently re-punctuate source lines. Disable automatic wrapping; pagination may occur only between complete source lines. If `single_slide: true`, place all source lines on that one slide and fit them by adjusting scripture-specific geometry and then the scripture font size, never by changing the lines.
 
 ## Slide Sequence
 

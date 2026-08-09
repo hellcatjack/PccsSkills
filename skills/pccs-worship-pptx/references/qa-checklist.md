@@ -13,6 +13,7 @@ Delivery is blocked until all applicable checks pass.
 - [ ] Chinese is simplified and divine pronouns use `祢`/`祂` correctly.
 - [ ] `lyrics_audit.md` exists and every correction has evidence and a reason.
 - [ ] `complete_lyrics.md` contains canonical sections and every performed instance.
+- [ ] Explicit scripture from TXT/guide input is stored as ordered `source_lines`; any authorized character normalization is audited without changing line boundaries.
 
 ## Slide Data
 
@@ -22,13 +23,16 @@ Delivery is blocked until all applicable checks pass.
 - [ ] Consecutive one-line `End*2` or `End*3` repetitions are combined on one page when they fit, with one identical visible line per performance.
 - [ ] Lyric pages have at most three lines and no punctuation.
 - [ ] Single spaces divide phrases.
+- [ ] Concatenating the ordered `lines` from every page for each `scripture_id` reproduces its canonical `source_lines` exactly.
+- [ ] `single_slide: true` scripture uses exactly one slide.
 
 ## Visual and Template Verification
 
 - [ ] Every slide was rendered individually at full size, not checked only in montage form.
 - [ ] Text has no clipping, overflow, unintended wrapping, overlap, or bottom-heavy placement.
 - [ ] First-song titles are centered `KaiTi` `54pt`.
-- [ ] Lyric/scripture body is consistently `KaiTi` `48pt`.
+- [ ] Lyric body is consistently `KaiTi` `48pt`; scripture is `KaiTi` and uses `48pt` unless a documented fit exception applies.
+- [ ] Each scripture source line is one visible paragraph with no automatic wrap, merge, split, reorder, or missing text.
 - [ ] Both `Name` and `NameFarEast` are set for editable Chinese runs.
 - [ ] Title and continuation song-name colors match the template.
 - [ ] Background, PCCS logo, and church identity are correct on every page.

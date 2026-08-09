@@ -136,9 +136,62 @@ def validate(payload: Any) -> tuple[list[str], list[str], dict[str, Any]]:
                 f"{label}: arrangement is absent; derive it from the matched YouTube performance and audit the decision."
             )
 
+    scriptures = payload.get("scripture", [])
+    if not isinstance(scriptures, list):
+        errors.append("scripture must be a list when supplied.")
+        scriptures = []
+
+    seen_scripture_ids: set[str] = set()
+    for position, scripture in enumerate(scriptures, start=1):
+        label = f"scripture[{position}]"
+        if not isinstance(scripture, dict):
+            errors.append(f"{label} must be an object.")
+            continue
+
+        scripture_id = scripture.get("id")
+        if not isinstance(scripture_id, str) or not scripture_id.strip():
+            errors.append(f"{label}.id is required.")
+        elif scripture_id in seen_scripture_ids:
+            errors.append(f"{label}.id {scripture_id!r} is duplicated.")
+        else:
+            seen_scripture_ids.add(scripture_id)
+
+        reference = scripture.get("reference")
+        if not isinstance(reference, str) or not reference.strip():
+            errors.append(f"{label}.reference is required.")
+
+        source_file = scripture.get("source_file")
+        if source_file is not None and (
+            not isinstance(source_file, str) or not source_file.strip()
+        ):
+            errors.append(f"{label}.source_file must be non-empty text when supplied.")
+
+        source_lines = scripture.get("source_lines")
+        if not isinstance(source_lines, list) or not source_lines:
+            errors.append(
+                f"{label}.source_lines must be a non-empty list preserving the source line boundaries."
+            )
+        else:
+            for line_number, line in enumerate(source_lines, start=1):
+                if not isinstance(line, str) or not line.strip():
+                    errors.append(
+                        f"{label}.source_lines[{line_number}] must be non-empty text."
+                    )
+
+        if scripture.get("preserve_line_breaks") is not True:
+            errors.append(
+                f"{label}.preserve_line_breaks must be true; scripture source lines may not be merged, split, or reordered."
+            )
+
+        if "single_slide" in scripture and not isinstance(
+            scripture.get("single_slide"), bool
+        ):
+            errors.append(f"{label}.single_slide must be true or false when supplied.")
+
     summary = {
         "status": "pass" if not errors else "fail",
         "song_count": len(songs),
+        "scripture_count": len(scriptures),
         "source_modes": dict(sorted(source_modes.items())),
         "warnings": warnings,
     }

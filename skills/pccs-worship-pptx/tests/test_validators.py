@@ -60,6 +60,25 @@ def youtube_search_project() -> dict:
     return payload
 
 
+def project_with_scripture() -> dict:
+    payload = image_project()
+    payload["scripture"] = [
+        {
+            "id": "scripture-1",
+            "position": "before_song_1",
+            "reference": "诗篇 62:5-8",
+            "source_file": "guide.txt",
+            "source_lines": [
+                "我的心哪，你当默默无声，专等候神，",
+                "因为我的盼望是从他而来。",
+            ],
+            "preserve_line_breaks": True,
+            "single_slide": True,
+        }
+    ]
+    return payload
+
+
 def valid_slide_data() -> dict:
     return {
         "songs": [
@@ -116,6 +135,42 @@ def valid_slide_data() -> dict:
             },
         ],
     }
+
+
+def valid_slide_data_with_scripture() -> dict:
+    payload = valid_slide_data()
+    source_lines = [
+        "我的心哪，你当默默无声，专等候神，",
+        "因为我的盼望是从他而来。",
+        "惟独他是我的磐石，我的拯救；",
+        "他是我的高台，我必不动摇。",
+        "我的拯救、我的荣耀都在乎神；",
+        "我力量的磐石、我的避难所都在乎神。",
+        "你们众民当时时倚靠他，",
+        "在他面前倾心吐意；",
+        "神是我们的避难所。",
+    ]
+    payload["scriptures"] = [
+        {
+            "id": "scripture-1",
+            "reference": "诗篇 62:5-8",
+            "source_file": "guide.txt",
+            "source_lines": source_lines,
+            "preserve_line_breaks": True,
+            "single_slide": True,
+        }
+    ]
+    payload["pages"].insert(
+        0,
+        {
+            "role": "scripture",
+            "scripture_id": "scripture-1",
+            "lines": list(source_lines),
+            "font": "KaiTi",
+            "body_font_pt": 30,
+        },
+    )
+    return payload
 
 
 class ProjectValidatorTests(unittest.TestCase):
@@ -193,6 +248,31 @@ class ProjectValidatorTests(unittest.TestCase):
         result = run_validator(PROJECT_VALIDATOR, payload)
         self.assertNotEqual(0, result.returncode)
         self.assertIn("special_notes", result.stderr)
+
+    def test_accepts_scripture_normalized_as_exact_source_lines(self):
+        result = run_validator(PROJECT_VALIDATOR, project_with_scripture())
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        self.assertEqual(1, json.loads(result.stdout)["scripture_count"])
+
+    def test_rejects_scripture_without_source_lines(self):
+        payload = project_with_scripture()
+        payload["scripture"][0].pop("source_lines")
+        payload["scripture"][0]["text"] = "第一行 第二行"
+
+        result = run_validator(PROJECT_VALIDATOR, payload)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("source_lines", result.stderr)
+
+    def test_rejects_scripture_when_line_break_preservation_is_disabled(self):
+        payload = project_with_scripture()
+        payload["scripture"][0]["preserve_line_breaks"] = False
+
+        result = run_validator(PROJECT_VALIDATOR, payload)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("preserve_line_breaks", result.stderr)
 
 
 class SlideDataValidatorTests(unittest.TestCase):
@@ -335,6 +415,39 @@ class SlideDataValidatorTests(unittest.TestCase):
         result = run_validator(SLIDE_VALIDATOR, payload)
         self.assertNotEqual(0, result.returncode)
         self.assertIn("title", result.stderr.lower())
+
+    def test_accepts_single_slide_scripture_with_exact_txt_line_boundaries(self):
+        payload = valid_slide_data_with_scripture()
+
+        result = run_validator(SLIDE_VALIDATOR, payload)
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual(1, summary["scripture_count"])
+        self.assertEqual(9, summary["scripture_source_lines"])
+
+    def test_rejects_scripture_lines_merged_from_txt_source(self):
+        payload = valid_slide_data_with_scripture()
+        payload["pages"][0]["lines"] = [
+            "我的心哪，你当默默无声，专等候神，因为我的盼望是从他而来。",
+            *payload["pages"][0]["lines"][2:],
+        ]
+
+        result = run_validator(SLIDE_VALIDATOR, payload)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("exact text, order, and line boundaries", result.stderr.lower())
+
+    def test_rejects_scripture_lines_reordered_from_txt_source(self):
+        payload = valid_slide_data_with_scripture()
+        payload["pages"][0]["lines"][0:2] = reversed(
+            payload["pages"][0]["lines"][0:2]
+        )
+
+        result = run_validator(SLIDE_VALIDATOR, payload)
+
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("exact text, order, and line boundaries", result.stderr.lower())
 
 
 if __name__ == "__main__":

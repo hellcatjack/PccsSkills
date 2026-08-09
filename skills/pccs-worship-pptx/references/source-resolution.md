@@ -4,6 +4,12 @@
 
 Resolve the exact lyric text and one concrete reference performance for each song. A channel or playlist URL identifies a search space, not automatically the recording to use.
 
+## Scripture From Service Guides
+
+When the user explicitly includes scripture in a TXT or guide file, that file is the authoritative source for scripture wording and line sequence. Capture the passage as an ordered line array before layout work. Do not use web copies, OCR, ASR, or remembered Bible formatting to merge, split, reorder, paraphrase, or re-punctuate those lines.
+
+If a global rule explicitly requires simplified Chinese or divine-pronoun normalization, apply it within each original line, record the character changes in the audit, and keep the original line count, order, and boundaries.
+
 ## With Lyric Images
 
 1. Inspect every image directly with the model's visual ability; do not require OCR software as the first step.

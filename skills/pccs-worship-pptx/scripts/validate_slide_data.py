@@ -7,6 +7,7 @@ import argparse
 import json
 import re
 import sys
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,7 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
         return ["Slide data must be a JSON object."], {}
 
     songs = payload.get("songs")
+    scriptures = payload.get("scriptures", [])
     pages = payload.get("pages")
     if not isinstance(songs, list) or not songs:
         errors.append("songs must be a non-empty list.")
@@ -33,6 +35,9 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
     if not isinstance(pages, list) or not pages:
         errors.append("pages must be a non-empty list.")
         pages = []
+    if not isinstance(scriptures, list):
+        errors.append("scriptures must be a list when supplied.")
+        scriptures = []
 
     song_by_id: dict[str, dict[str, Any]] = {}
     expected_sequences: dict[str, list[str]] = {}
@@ -81,10 +86,49 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             normalized.append(token)
         expected_sequences[song_id] = normalized
 
+    scripture_by_id: dict[str, dict[str, Any]] = {}
+    scripture_source_line_count = 0
+    for position, scripture in enumerate(scriptures, start=1):
+        label = f"scriptures[{position}]"
+        if not isinstance(scripture, dict):
+            errors.append(f"{label} must be an object.")
+            continue
+        scripture_id = scripture.get("id")
+        if not isinstance(scripture_id, str) or not scripture_id.strip():
+            errors.append(f"{label}.id is required.")
+            continue
+        if scripture_id in scripture_by_id:
+            errors.append(f"{label}.id {scripture_id!r} is duplicated.")
+            continue
+
+        source_lines = scripture.get("source_lines")
+        if not isinstance(source_lines, list) or not source_lines:
+            errors.append(f"{label}.source_lines must be a non-empty list.")
+            source_lines = []
+        else:
+            for line_number, line in enumerate(source_lines, start=1):
+                if not isinstance(line, str) or not line.strip():
+                    errors.append(
+                        f"{label}.source_lines[{line_number}] must be non-empty text."
+                    )
+        if scripture.get("preserve_line_breaks") is not True:
+            errors.append(f"{label}.preserve_line_breaks must be true.")
+        if "single_slide" in scripture and not isinstance(
+            scripture.get("single_slide"), bool
+        ):
+            errors.append(f"{label}.single_slide must be true or false when supplied.")
+
+        scripture_by_id[scripture_id] = scripture
+        scripture_source_line_count += len(source_lines)
+
     performance_pages: dict[str, list[tuple[tuple[int, ...], str, int, str]]] = {
         song_id: [] for song_id in song_by_id
     }
     page_song_ids: list[str] = []
+    scripture_page_lines: dict[str, list[str]] = {
+        scripture_id: [] for scripture_id in scripture_by_id
+    }
+    scripture_page_counts: Counter[str] = Counter()
 
     for position, page in enumerate(pages, start=1):
         label = f"pages[{position}]"
@@ -99,14 +143,22 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
         if not isinstance(lines, list) or not lines:
             errors.append(f"{label}.lines must be a non-empty list.")
             lines = []
-        if len(lines) > 3:
+        if role in SONG_ROLES and len(lines) > 3:
             errors.append(f"{label} must contain at most 3 lines.")
 
         font = page.get("font")
         if role in BODY_ROLES and font != "KaiTi":
             errors.append(f"{label}.font must be KaiTi.")
-        if role in BODY_ROLES and page.get("body_font_pt") != 48:
+        if role in SONG_ROLES and page.get("body_font_pt") != 48:
             errors.append(f"{label}.body_font_pt must be exactly 48.")
+        if role == "scripture":
+            body_font_pt = page.get("body_font_pt")
+            if (
+                not isinstance(body_font_pt, (int, float))
+                or isinstance(body_font_pt, bool)
+                or body_font_pt <= 0
+            ):
+                errors.append(f"{label}.body_font_pt must be a positive number.")
         if role == "song_first" and page.get("title_font_pt") != 54:
             errors.append(f"{label}.title_font_pt must be exactly 54.")
 
@@ -114,7 +166,7 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             if not isinstance(raw_line, str) or not raw_line.strip():
                 errors.append(f"{label}.lines[{line_number}] must be non-empty text.")
                 continue
-            if "  " in raw_line:
+            if role in SONG_ROLES and "  " in raw_line:
                 errors.append(
                     f"{label}.lines[{line_number}] contains repeated spaces; use single spaces."
                 )
@@ -122,6 +174,16 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
                 errors.append(
                     f"{label}.lines[{line_number}] contains lyric punctuation."
                 )
+
+        if role == "scripture":
+            scripture_id = page.get("scripture_id")
+            if scripture_id not in scripture_by_id:
+                errors.append(
+                    f"{label}.scripture_id does not reference a declared scripture source."
+                )
+            else:
+                scripture_page_counts[scripture_id] += 1
+                scripture_page_lines[scripture_id].extend(lines)
 
         if role in SONG_ROLES:
             song_id = page.get("song_id")
@@ -195,6 +257,22 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
                 (indexes, section.strip(), position, role)
             )
 
+    for scripture_id, scripture in scripture_by_id.items():
+        expected_lines = scripture.get("source_lines")
+        if not isinstance(expected_lines, list):
+            expected_lines = []
+        actual_lines = scripture_page_lines.get(scripture_id, [])
+        if actual_lines != expected_lines:
+            errors.append(
+                f"Scripture {scripture_id!r} pages must preserve exact text, order, and line boundaries from source_lines."
+            )
+        if scripture.get("single_slide") is True and scripture_page_counts.get(
+            scripture_id, 0
+        ) != 1:
+            errors.append(
+                f"Scripture {scripture_id!r} is marked single_slide and must use exactly one scripture page."
+            )
+
     song_blocks: list[str] = []
     for song_id in page_song_ids:
         if not song_blocks or song_blocks[-1] != song_id:
@@ -242,6 +320,8 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
     summary = {
         "status": "pass" if not errors else "fail",
         "song_count": len(songs),
+        "scripture_count": len(scriptures),
+        "scripture_source_lines": scripture_source_line_count,
         "page_count": len(pages),
         "performance_sections": sum(len(items) for items in actual_sequences.values()),
     }

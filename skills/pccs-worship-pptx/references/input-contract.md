@@ -56,9 +56,16 @@ At least one source must exist per song: an image, YouTube URL, audio file, offi
 {
   "scripture": [
     {
+      "id": "scripture-1",
       "position": "before_song_2",
       "reference": "诗篇 62:5-8",
-      "text": "..."
+      "source_file": "guide.txt",
+      "source_lines": [
+        "我的心哪，你当默默无声，专等候神，",
+        "因为我的盼望是从他而来。"
+      ],
+      "preserve_line_breaks": true,
+      "single_slide": true
     }
   ],
   "deliverables": {
@@ -71,7 +78,30 @@ At least one source must exist per song: an image, YouTube URL, audio file, offi
 }
 ```
 
-Scripture keeps normal punctuation unless the user explicitly requests otherwise. Lyric punctuation is removed only in the PPT lyric lines.
+When the request explicitly includes scripture, normalize it into `source_lines` before slide planning:
+
+- For a TXT or guide file, read each physical scripture line in order. Do not replace the array with one continuous `text` string.
+- Preserve the number, order, and boundaries of those lines. Only an explicitly required project-wide text policy may change characters within a line; record such changes in the audit and never move text across a line boundary.
+- Keep scripture punctuation and intentional spacing. Lyric punctuation removal applies only to song lyrics.
+- Set `single_slide: true` only when the user explicitly requires the whole passage on one slide.
+- Copy the same scripture records into the slide plan's top-level `scriptures` array. Every scripture page must reference one record through `scripture_id`.
+
+Example slide-plan page:
+
+```json
+{
+  "role": "scripture",
+  "scripture_id": "scripture-1",
+  "lines": [
+    "我的心哪，你当默默无声，专等候神，",
+    "因为我的盼望是从他而来。"
+  ],
+  "font": "KaiTi",
+  "body_font_pt": 48
+}
+```
+
+Across all pages for one `scripture_id`, concatenated `lines` must equal `source_lines` exactly. This permits pagination only between source lines and prevents merging, splitting, or reordering.
 
 ## Compact Chat Input
 

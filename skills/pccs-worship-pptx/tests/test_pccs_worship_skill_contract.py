@@ -42,6 +42,8 @@ class SkillContractTests(unittest.TestCase):
             "\u590d\u5236",
             "performance_indexes",
             "End*2",
+            "source_lines",
+            "TXT",
         ]
         missing = [term for term in required_terms if term not in skill]
         self.assertEqual([], missing, f"Missing SKILL.md terms: {missing}")

@@ -53,6 +53,12 @@ Performance annotations such as `跳音`, `轻唱`, `渐强`, or `男女轮唱` 
 - Use single spaces to divide phrases; do not create repeated spaces.
 - Do not cut a semantic phrase merely to fill a slide.
 
+## Preserve Scripture Lines
+
+Scripture supplied explicitly in a TXT or guide file is not processed like lyrics. Capture the source as ordered `source_lines` before pagination. Keep every source line intact and in the same position; do not merge short lines, split long lines, reorder phrases, or remove punctuation for visual balance.
+
+Explicit project-wide character policies may be applied within a line, but they must be audited and must not change line boundaries. Carry the canonical `source_lines` unchanged into the slide plan. If multiple scripture pages are allowed, split only between array items. If `single_slide: true`, keep every item on one slide and solve fit through scripture-specific layout or font sizing.
+
 ## Create `lyrics_audit.md`
 
 This file must exist before `complete_lyrics.md` or PPT generation. For each song record:
