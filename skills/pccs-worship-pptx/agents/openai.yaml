@@ -1,4 +1,4 @@
 interface:
   display_name: "PCCS Worship PPTX"
   short_description: "Create audited PCCS worship lyric PowerPoint decks"
-  default_prompt: "Use $pccs-worship-pptx to build an audited editable worship PPTX from my template, songs, arrangements, lyric images, and YouTube sources."
+  default_prompt: "Use $pccs-worship-pptx to build an audited editable worship PPTX from the bundled PCCS template or my supplied template override, plus songs, arrangements, lyric images, and YouTube sources."

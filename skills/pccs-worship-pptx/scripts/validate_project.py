@@ -14,6 +14,7 @@ from typing import Any
 
 ALLOWED_SOURCE_MODES = {"auto", "images", "youtube", "youtube_search"}
 ARRANGEMENT_TOKEN = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*(?:\*[1-9]\d*)?$")
+DEFAULT_TEMPLATE_PPTX = "assets/pccsworship.pptx"
 
 
 def nonempty_list(value: Any) -> list[str]:
@@ -50,10 +51,25 @@ def validate(payload: Any) -> tuple[list[str], list[str], dict[str, Any]]:
 
     if not project.get("project_id") and not project.get("service_date"):
         errors.append("project requires project_id or service_date.")
-    if not isinstance(project.get("template_pptx"), str) or not project.get(
-        "template_pptx", ""
-    ).strip():
-        errors.append("project.template_pptx is required.")
+
+    requested_template = project.get("template_pptx")
+    if requested_template is None or (
+        isinstance(requested_template, str) and not requested_template.strip()
+    ):
+        effective_template = DEFAULT_TEMPLATE_PPTX
+        template_source = "skill_default"
+        default_template_path = Path(__file__).resolve().parents[1] / DEFAULT_TEMPLATE_PPTX
+        if not default_template_path.is_file():
+            errors.append(
+                f"Bundled default template is missing: {DEFAULT_TEMPLATE_PPTX}."
+            )
+    elif isinstance(requested_template, str):
+        effective_template = requested_template.strip()
+        template_source = "user_supplied"
+    else:
+        errors.append("project.template_pptx must be text, blank, or omitted.")
+        effective_template = DEFAULT_TEMPLATE_PPTX
+        template_source = "invalid"
 
     songs = payload.get("songs")
     if not isinstance(songs, list) or not songs:
@@ -192,6 +208,8 @@ def validate(payload: Any) -> tuple[list[str], list[str], dict[str, Any]]:
         "status": "pass" if not errors else "fail",
         "song_count": len(songs),
         "scripture_count": len(scriptures),
+        "effective_template_pptx": effective_template,
+        "template_source": template_source,
         "source_modes": dict(sorted(source_modes.items())),
         "warnings": warnings,
     }

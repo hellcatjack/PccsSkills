@@ -4,9 +4,16 @@
 
 Use the **Presentations** skill for template inspection, PPTX modification, rendering, and validation. Load the workspace presentation dependencies before editing. Follow its render-and-verify workflow and use native editable shapes and text.
 
+## Template Selection
+
+1. If the user supplies a non-empty `template_pptx`, use that file.
+2. Otherwise use `<skill-dir>/assets/pccsworship.pptx`.
+
+Resolve the bundled path from the skill directory, not from the current working directory. Copy the selected template into the project workspace and edit the copy. Never overwrite the bundled asset.
+
 ## Inspect Before Editing
 
-Inspect the complete uploaded template, including slide size, all template slides, masters, layouts, placeholders, background inheritance, theme colors, fonts, logo/church identity shapes, and text-box geometry. Do not assume slide 1 and slide 2 are interchangeable.
+Inspect the complete selected template, including slide size, all template slides, masters, layouts, placeholders, background inheritance, theme colors, fonts, logo/church identity shapes, and text-box geometry. Do not assume slide 1 and slide 2 are interchangeable.
 
 Use the template's first-song page for the first page of each song and its continuation style for later lyric pages. Preserve the current template's title color and continuation-page song-name color exactly.
 

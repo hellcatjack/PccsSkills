@@ -2,14 +2,14 @@
 
 Normalize free-form chat, uploaded files, or YAML into a project object before lyric work. Preserve the user's wording in notes, but use the normalized fields below for validation and generation.
 
-## Required Project Fields
+## Project Fields
 
 ```json
 {
   "project": {
     "project_id": "pccs_2026-08-09",
     "service_date": "2026-08-09",
-    "template_pptx": "pccsworship.pptx",
+    "template_pptx": "",
     "language": "简体中文",
     "font": "KaiTi",
     "title_font_pt": 54,
@@ -21,7 +21,12 @@ Normalize free-form chat, uploaded files, or YAML into a project object before l
 }
 ```
 
-Require a non-empty `template_pptx`, at least one song, and either `project_id` or `service_date`.
+Require at least one song and either `project_id` or `service_date`. `template_pptx` is optional:
+
+- A non-empty value selects the user-supplied template and overrides the skill default.
+- A missing, empty, or whitespace-only value selects `assets/pccsworship.pptx` from the installed skill directory.
+- Resolve the default relative to `SKILL.md`, not the current working directory or project root.
+- Copy the selected template to the project workspace before editing; never modify the bundled asset in place.
 
 ## Song Fields
 
@@ -108,7 +113,7 @@ Across all pages for one `scripture_id`, concatenated `lines` must equal `source
 Accept this style without requiring the user to rewrite it as YAML:
 
 ```text
-模板：pccsworship.pptx
+模板：可省略；省略时使用 skill 内置模板
 日期：2026-08-09
 1 这里有荣耀 G调
 顺序：V V C1 C2 V C1 C2 C1 C2 End*2

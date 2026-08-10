@@ -179,6 +179,28 @@ class ProjectValidatorTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertEqual("pass", json.loads(result.stdout)["status"])
 
+    def test_uses_bundled_template_when_project_does_not_specify_one(self):
+        payload = image_project()
+        payload["project"].pop("template_pptx")
+
+        result = run_validator(PROJECT_VALIDATOR, payload)
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual("assets/pccsworship.pptx", summary["effective_template_pptx"])
+        self.assertEqual("skill_default", summary["template_source"])
+
+    def test_user_template_overrides_bundled_default(self):
+        payload = image_project()
+        payload["project"]["template_pptx"] = "custom-template.pptx"
+
+        result = run_validator(PROJECT_VALIDATOR, payload)
+
+        self.assertEqual(0, result.returncode, result.stderr)
+        summary = json.loads(result.stdout)
+        self.assertEqual("custom-template.pptx", summary["effective_template_pptx"])
+        self.assertEqual("user_supplied", summary["template_source"])
+
     def test_accepts_youtube_search_without_arrangement_and_warns(self):
         result = run_validator(PROJECT_VALIDATOR, youtube_search_project())
         self.assertEqual(0, result.returncode, result.stderr)

@@ -1,4 +1,5 @@
 import unittest
+import zipfile
 from pathlib import Path
 
 
@@ -17,6 +18,7 @@ class SkillContractTests(unittest.TestCase):
             "references/qa-checklist.md",
             "scripts/validate_project.py",
             "scripts/validate_slide_data.py",
+            "assets/pccsworship.pptx",
         ]
         missing = [item for item in required if not (SKILL_DIR / item).is_file()]
         self.assertEqual([], missing, f"Missing skill files: {missing}")
@@ -44,9 +46,32 @@ class SkillContractTests(unittest.TestCase):
             "End*2",
             "source_lines",
             "TXT",
+            "assets/pccsworship.pptx",
         ]
         missing = [term for term in required_terms if term not in skill]
         self.assertEqual([], missing, f"Missing SKILL.md terms: {missing}")
+
+    def test_bundled_default_template_is_a_valid_two_slide_pptx(self):
+        template_path = SKILL_DIR / "assets" / "pccsworship.pptx"
+        self.assertTrue(template_path.is_file(), f"Missing {template_path}")
+        self.assertGreater(template_path.stat().st_size, 0)
+
+        with zipfile.ZipFile(template_path) as package:
+            entries = set(package.namelist())
+
+        required_entries = {
+            "[Content_Types].xml",
+            "ppt/presentation.xml",
+            "ppt/slides/slide1.xml",
+            "ppt/slides/slide2.xml",
+        }
+        self.assertTrue(required_entries.issubset(entries))
+        slide_entries = {
+            entry
+            for entry in entries
+            if entry.startswith("ppt/slides/slide") and entry.endswith(".xml")
+        }
+        self.assertEqual(2, len(slide_entries))
 
     def test_openai_yaml_has_explicit_invocation(self):
         metadata_path = SKILL_DIR / "agents" / "openai.yaml"
@@ -54,6 +79,7 @@ class SkillContractTests(unittest.TestCase):
         metadata = metadata_path.read_text(encoding="utf-8")
         self.assertIn("PCCS Worship PPTX", metadata)
         self.assertIn("$pccs-worship-pptx", metadata)
+        self.assertIn("bundled", metadata.lower())
 
     def test_repository_copy_has_no_personal_install_path(self):
         forbidden_markers = [

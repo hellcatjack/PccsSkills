@@ -28,6 +28,8 @@ Delivery is blocked until all applicable checks pass.
 
 ## Visual and Template Verification
 
+- [ ] The effective template is recorded as either `user_supplied` or `skill_default`; an omitted template resolves to `<skill-dir>/assets/pccsworship.pptx`.
+- [ ] The bundled template remains unchanged because generation used a working copy.
 - [ ] Every slide was rendered individually at full size, not checked only in montage form.
 - [ ] Text has no clipping, overflow, unintended wrapping, overlap, or bottom-heavy placement.
 - [ ] First-song titles are centered `KaiTi` `54pt`.
