@@ -15,7 +15,7 @@ Resolve the bundled path from the skill directory, not from the current working 
 
 Inspect the complete selected template, including slide size, all template slides, masters, layouts, placeholders, background inheritance, theme colors, fonts, logo/church identity shapes, and text-box geometry. Do not assume slide 1 and slide 2 are interchangeable.
 
-Use the template's first-song page for the first page of each song and its continuation style for later lyric pages. Preserve the current template's title color and continuation-page song-name color exactly.
+Use the template's first-song page for the first page of each song and its continuation style for later lyric pages. For a strictly template-faithful request, preserve the current template's title color and continuation-page song-name color exactly. When refined or content-adapted styling is requested or already present, follow `visual-style.md` instead.
 
 ## Template Integrity
 
@@ -24,6 +24,13 @@ Use the template's first-song page for the first page of each song and its conti
 - Do not flatten the whole slide into a background image.
 - If copying a slide loses its background or church identity, repair the master/layout relationship before generating the deck.
 - If native inheritance cannot be repaired reliably, use self-contained editable/template shapes as a documented fallback and verify duplication again.
+- When songs use different custom backgrounds, create one custom layout per distinct scene and give each layout a unique `Name` and `MatchingName`.
+- Inspect protruding logo elements such as the PCCS cross tip. If a new background covers them, restore the exact original element as a transparent layout overlay according to `visual-style.md`; do not redraw it.
+- Remove empty title and subtitle placeholders from generated slides before the final save. Never remove non-empty content or alter the bundled template asset.
+
+## Visual Styling
+
+For a refined, themed, or content-adapted deck, apply `visual-style.md` in addition to this file. It defines song-specific background composition, the shared PCCS palette, logo-tip extraction and overlay, text colors and shadows, placeholder cleanup, and duplication safety. Explicit user instructions and newly supplied template rules remain authoritative.
 
 ## Typography
 
@@ -34,6 +41,7 @@ Use the template's first-song page for the first page of each song and its conti
 - Continuation-page song-name size, weight, and position come from the template unless the user supplies a newer rule.
 - Do not switch lyric body sizes between slides.
 - Never use automatic font shrinking. Select scripture exceptions explicitly and verify them by rendering.
+- Preserve template text colors in template-faithful mode. In refined mode, use the element-specific fills and text shadows from `visual-style.md`; apply text shadow to the font, not to the text-box shape.
 
 ## Content Layout
 
