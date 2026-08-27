@@ -11,47 +11,45 @@ class SkillContractTests(unittest.TestCase):
         required = [
             "SKILL.md",
             "agents/openai.yaml",
+            "assets/pccsworship.pptx",
             "references/input-contract.md",
-            "references/source-resolution.md",
-            "references/lyrics-pipeline.md",
-            "references/ppt-template-rules.md",
+            "references/content-rules.md",
+            "references/visual-style.md",
             "references/qa-checklist.md",
             "scripts/validate_project.py",
-            "scripts/validate_slide_data.py",
-            "assets/pccsworship.pptx",
+            "scripts/qa_pccs_service_pptx.ps1",
         ]
         missing = [item for item in required if not (SKILL_DIR / item).is_file()]
         self.assertEqual([], missing, f"Missing skill files: {missing}")
 
-    def test_skill_links_references_and_hard_requirements(self):
+    def test_skill_declares_non_lyric_scope_and_visual_invariants(self):
         skill_path = SKILL_DIR / "SKILL.md"
         self.assertTrue(skill_path.is_file(), f"Missing {skill_path}")
         skill = skill_path.read_text(encoding="utf-8")
         required_terms = [
-            "references/input-contract.md",
-            "references/source-resolution.md",
-            "references/lyrics-pipeline.md",
-            "references/ppt-template-rules.md",
-            "references/qa-checklist.md",
-            "lyrics_audit.md",
-            "complete_lyrics.md",
+            "pccs-worship-pptx",
             "Presentations",
-            "54pt",
-            "48pt",
-            "NameFarEast",
-            "YouTube",
-            "\u6b4c\u8bcd\u56fe\u7247",
-            "\u590d\u5236",
-            "performance_indexes",
-            "End*2",
-            "source_lines",
-            "TXT",
+            "references/input-contract.md",
+            "references/content-rules.md",
+            "references/visual-style.md",
+            "references/qa-checklist.md",
             "assets/pccsworship.pptx",
+            "1920x920",
+            "48:23",
+            "0,0,720,345",
+            "PCCS logo tip overlay",
+            "MatchingName",
+            "Click to add title",
+            "Click to add subtitle",
+            "复制",
+            "经文",
+            "二维码",
+            "非歌词",
         ]
         missing = [term for term in required_terms if term not in skill]
         self.assertEqual([], missing, f"Missing SKILL.md terms: {missing}")
 
-    def test_bundled_default_template_is_a_valid_two_slide_pptx(self):
+    def test_bundled_template_is_a_valid_two_slide_pptx(self):
         template_path = SKILL_DIR / "assets" / "pccsworship.pptx"
         self.assertTrue(template_path.is_file(), f"Missing {template_path}")
         self.assertGreater(template_path.stat().st_size, 0)
@@ -73,30 +71,33 @@ class SkillContractTests(unittest.TestCase):
         }
         self.assertEqual(2, len(slide_entries))
 
-    def test_openai_yaml_has_explicit_invocation(self):
+    def test_openai_yaml_exposes_service_slide_skill(self):
         metadata_path = SKILL_DIR / "agents" / "openai.yaml"
         self.assertTrue(metadata_path.is_file(), f"Missing {metadata_path}")
         metadata = metadata_path.read_text(encoding="utf-8")
-        self.assertIn("PCCS Worship PPTX", metadata)
-        self.assertIn("$pccs-worship-pptx", metadata)
-        self.assertIn("bundled", metadata.lower())
+        self.assertIn("PCCS Service PPTX", metadata)
+        self.assertIn("$pccs-service-pptx", metadata)
+        self.assertIn("non-lyric", metadata.lower())
 
-    def test_visual_style_captures_recent_beautification_contract(self):
+    def test_powerpoint_qa_accepts_a_layout_background_name_pattern(self):
+        script_path = SKILL_DIR / "scripts" / "qa_pccs_service_pptx.ps1"
+        self.assertTrue(script_path.is_file(), f"Missing {script_path}")
+        script = script_path.read_text(encoding="utf-8-sig")
+        self.assertIn("BackgroundNamePattern", script)
+        self.assertGreaterEqual(script.count("-like $BackgroundNamePattern"), 2)
+
+    def test_visual_style_captures_recent_cover_and_hierarchy_contract(self):
         style = (SKILL_DIR / "references" / "visual-style.md").read_text(
             encoding="utf-8"
         )
         style_terms = [
-            "1920x920",
-            "48:23",
-            "720x345",
-            "x=80..300px",
-            "y=760..920px",
-            "warm pearl-white",
+            "first slide",
+            "highest visual scrutiny",
             "front-row sightlines",
-            "two lyric lines",
-            "top-align",
-            "PCCS logo tip overlay",
-            "TextFrame2.TextRange.Font.Shadow",
+            "top half",
+            "editable emphasis shapes",
+            "dominant dark-purple block",
+            "latest effective template",
         ]
         missing_style = [term for term in style_terms if term not in style]
         self.assertEqual([], missing_style, f"Missing visual-style terms: {missing_style}")
@@ -105,12 +106,12 @@ class SkillContractTests(unittest.TestCase):
             encoding="utf-8"
         )
         checklist_terms = [
-            "1920x920",
-            "48:23",
+            "first slide",
+            "highest visual scrutiny",
             "front-row sightlines",
-            "two-line first page",
-            "top-aligned",
-            "warm pearl-white",
+            "editable emphasis shapes",
+            "dominant dark-purple block",
+            "latest effective template",
         ]
         missing_checklist = [term for term in checklist_terms if term not in checklist]
         self.assertEqual(
@@ -124,13 +125,20 @@ class SkillContractTests(unittest.TestCase):
             "/" + "home" + "/",
             "AppData" + "\\",
         ]
-        text_suffixes = {".md", ".py", ".yaml", ".yml", ".json", ".txt"}
+        text_suffixes = {".md", ".py", ".ps1", ".yaml", ".yml", ".json", ".txt"}
         for source_file in SKILL_DIR.rglob("*"):
             if not source_file.is_file() or source_file.suffix.lower() not in text_suffixes:
                 continue
             content = source_file.read_text(encoding="utf-8")
             for marker in forbidden_markers:
                 self.assertNotIn(marker, content, f"Personal path in {source_file}")
+
+    def test_repository_readme_lists_the_skill(self):
+        readme_path = SKILL_DIR.parents[1] / "README.md"
+        if not readme_path.is_file():
+            self.skipTest("Repository README is not included in an installed skill copy")
+        readme = readme_path.read_text(encoding="utf-8")
+        self.assertIn("pccs-service-pptx", readme)
 
 
 if __name__ == "__main__":

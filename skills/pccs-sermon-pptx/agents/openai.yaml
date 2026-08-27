@@ -1,0 +1,4 @@
+interface:
+  display_name: "PCCS Sermon PPTX"
+  short_description: "Beautify weekly PCCS sermon video decks safely"
+  default_prompt: "Use $pccs-sermon-pptx to beautify this weekly sermon PPTX for video while preserving every slide, word, animation, and transition."

@@ -1,9 +1,11 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.tmp/
 .coverage
 htmlcov/
 .venv/
+.audio-skill-venv/
 venv/
 *.egg-info/
 .DS_Store

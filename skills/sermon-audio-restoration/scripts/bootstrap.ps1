@@ -11,7 +11,7 @@ foreach ($commandName in @('ffmpeg', 'ffprobe')) {
     }
 }
 
-$projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..\..')).Path
+$projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 $venvPath = Join-Path $projectRoot '.audio-skill-venv'
 $venvPython = Join-Path $venvPath 'Scripts\python.exe'
 

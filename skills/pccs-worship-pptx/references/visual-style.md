@@ -6,6 +6,14 @@ Use this visual system when the user requests a refined, themed, or content-adap
 
 Once this system is active for a deck, keep it active for later revisions unless the user explicitly changes direction.
 
+## Template and Canvas Contract
+
+- Resolve the **latest effective template** before designing. A newly supplied non-empty template is authoritative for the current project; otherwise use the bundled template. Do not inherit an older embedded layout merely because it exists inside a source deck.
+- The current PCCS slide is `720x405pt`, with a native footer occupying the lower `60pt`. Refined artwork covers only the upper `720x345pt` content region.
+- Generate each worship background natively at `1920x920` with a `48:23` ratio, then place it at `Left=0`, `Top=0`, `Width=720`, `Height=345` points.
+- Do not place a `16:9` image at a negative Y offset. That crops the intended scene, weakens the composition, and causes objects to disappear behind the footer.
+- Keep the native footer, PCCS logo, church name, and other identity elements from the latest effective template rather than baking them into generated artwork.
+
 ## Song Backgrounds
 
 - Design one distinct background scene for each song. Derive the scene from the song's central image, message, and emotional direction rather than reusing one generic image.
@@ -17,6 +25,14 @@ Once this system is active for a deck, keep it active for later revisions unless
 - Add each background once to a song-specific custom layout. Do not repeat the same full-slide image on every slide and do not flatten the complete slide into a bitmap.
 - Give every distinct custom layout a unique `Name` and a unique `MatchingName`. PowerPoint can render duplicated layouts with the wrong song background when their `MatchingName` values collide, even when the OOXML relationships appear correct.
 
+## Sanctuary Visibility and First-Page Balance
+
+- Compose for **front-row sightlines**. Keep the main lyric block in the upper or upper-middle content area instead of using the lowest available space.
+- Preserve a quiet upper-center reading field. Do not place a bright window, horizon, face, architecture edge, or high-frequency texture directly behind the first two lyric lines.
+- On a song's first page, a title plus **two lyric lines** must **top-align** within the body region. Do not vertically center those two lines in the remaining space; the result sits too low in the sanctuary and looks visually detached from the title.
+- For three lyric lines, use the established lyric grid and balanced line spacing. Do not switch font size merely to force visual centering.
+- Keep title, lyric block, and continuation song name on stable shared anchors so repeated pages do not jump vertically.
+
 ## PCCS Logo and Church Identity
 
 - Preserve the original PCCS logo, church name, footer, and all other identity elements from the selected template.
@@ -26,6 +42,13 @@ Once this system is active for a deck, keep it active for later revisions unless
 - Map the source-image crop to slide coordinates proportionally. Keep its size and position aligned to the untouched template pixels beneath it.
 - Place the transparent overlay above the song background on every affected custom layout. Keep it on the layout rather than copying it onto every slide.
 - Give the overlay a descriptive shape name such as `PCCS logo tip overlay` so later revisions can identify it safely.
+
+The PCCS cross tip contains a translucent warm halo. A colored or textured background directly behind that halo creates a visible color blob even when the crop itself is correct. For every `1920x920` background:
+
+- Reserve approximately `x=80..300px`, `y=760..920px` as a uniform **warm pearl-white** or ivory field.
+- Feather the field into the surrounding artwork; do not use a visible rectangle, hard ellipse, lavender ribbon, or isolated white patch.
+- Keep architecture edges, foliage, water texture, shadows, photographs, and saturated color outside this zone.
+- If the generated artwork contains color in the zone, blend it to warm ivory before inserting the exact `PCCS logo tip overlay`.
 
 ## Refined Typography
 
@@ -43,6 +66,7 @@ These colors and shadows are the defaults for the bundled refined ivory/lavender
 - Do not simulate shadows with duplicate text layers.
 - Do not add gradients, glow, outlines, bevels, or heavy black shadows to lyrics.
 - Check contrast against every song background. If a background prevents the standard palette from remaining legible, adjust the background first; change text colors only as a documented last resort.
+- Keep body text out of the lowest part of the content canvas when the same composition fits higher. This is a visibility requirement, not a reason to change the fixed lyric font size.
 
 ## Placeholder Cleanup
 

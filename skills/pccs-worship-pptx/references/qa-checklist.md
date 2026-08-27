@@ -38,10 +38,14 @@ Delivery is blocked until all applicable checks pass.
 - [ ] Both `Name` and `NameFarEast` are set for editable Chinese runs.
 - [ ] Template-faithful decks preserve template title and continuation song-name colors; refined decks use the fills and text shadows defined in `visual-style.md` or an explicit user override.
 - [ ] Refined decks use a distinct content-appropriate background for each song while keeping one coherent palette, medium, and lighting treatment.
+- [ ] Refined backgrounds are natively `1920x920` at `48:23` and occupy exactly `0,0,720,345pt`; no `16:9` artwork is shifted upward and cropped behind the footer.
 - [ ] The upper-center lyric area remains quiet and low contrast, with no dense artwork or bright highlight interfering with text.
+- [ ] Lyric placement accounts for **front-row sightlines** and does not use the lower content edge when the same text fits higher.
+- [ ] A **two-line first page** is **top-aligned** beneath the title rather than vertically centered in the remaining content region.
 - [ ] Every distinct song background uses the intended custom layout, and each such layout has a unique `Name` and `MatchingName`.
 - [ ] Background, PCCS logo, and church identity are correct on every page.
 - [ ] No background obscures the PCCS logo cross tip or another protruding identity element; any restoration overlay uses the exact original pixels and is aligned correctly.
+- [ ] The PCCS cross tip sits above a softly blended **warm pearl-white** safe field with no lavender, gray, or saturated color blob behind its halo.
 - [ ] No generated slide contains an empty title or subtitle placeholder, including `Click to add title` and `Click to add subtitle` boxes.
 - [ ] Lyrics remain editable text, not rasterized text.
 
