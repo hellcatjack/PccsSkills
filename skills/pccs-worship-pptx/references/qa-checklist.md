@@ -22,6 +22,7 @@ Delivery is blocked until all applicable checks pass.
 - [ ] Each performed section is represented exactly once in sequence; multipage sections share one `performance_index`, while a grouped ending page uses consecutive `performance_indexes`.
 - [ ] Consecutive one-line `End*2` or `End*3` repetitions are combined on one page when they fit, with one identical visible line per performance.
 - [ ] Lyric pages have at most three lines and no punctuation.
+- [ ] When score evidence is available, page breaks follow complete musical phrases, breath points, rests, or cadences; two-line pages are preferred when they better match singing rhythm.
 - [ ] Single spaces divide phrases.
 - [ ] Concatenating the ordered `lines` from every page for each `scripture_id` reproduces its canonical `source_lines` exactly.
 - [ ] `single_slide: true` scripture uses exactly one slide.
@@ -31,9 +32,11 @@ Delivery is blocked until all applicable checks pass.
 - [ ] The effective template is recorded as either `user_supplied` or `skill_default`; an omitted template resolves to `<skill-dir>/assets/pccsworship.pptx`.
 - [ ] The bundled template remains unchanged because generation used a working copy.
 - [ ] Every slide was rendered individually at full size, not checked only in montage form.
+- [ ] `scripts/validate_final_pptx.mjs FINAL.pptx SLIDES.json` passes against the actual PPTX; slide-plan declarations alone are not accepted as font evidence.
 - [ ] Text has no clipping, overflow, unintended wrapping, overlap, or bottom-heavy placement.
 - [ ] First-song titles are centered `KaiTi` `54pt`.
-- [ ] Lyric body is consistently `KaiTi` `48pt`; scripture is `KaiTi` and uses `48pt` unless a documented fit exception applies.
+- [ ] Every non-empty lyric run in the actual PPTX is consistently `KaiTi` `48pt`; no three-line page inherits `44pt`, and scripture is `KaiTi` and uses `48pt` unless a documented fit exception applies.
+- [ ] Every planned lyric line remains one rendered line; the rendered line count exactly matches the slide plan and no automatic shrinking is active.
 - [ ] Each scripture source line is one visible paragraph with no automatic wrap, merge, split, reorder, or missing text.
 - [ ] Both `Name` and `NameFarEast` are set for editable Chinese runs.
 - [ ] Template-faithful decks preserve template title and continuation song-name colors; refined decks use the fills and text shadows defined in `visual-style.md` or an explicit user override.
@@ -48,6 +51,7 @@ Delivery is blocked until all applicable checks pass.
 - [ ] The PCCS cross tip sits above a softly blended **warm pearl-white** safe field with no lavender, gray, or saturated color blob behind its halo.
 - [ ] No generated slide contains an empty title or subtitle placeholder, including `Click to add title` and `Click to add subtitle` boxes.
 - [ ] Lyrics remain editable text, not rasterized text.
+- [ ] For a scoped revision, render-hash or image comparison confirms that untouched source slides remain pixel-identical when a source render is available; document any intentional difference.
 
 ## Microsoft PowerPoint Duplicate Test
 

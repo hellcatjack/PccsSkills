@@ -18,6 +18,7 @@ class SkillContractTests(unittest.TestCase):
             "references/qa-checklist.md",
             "scripts/validate_project.py",
             "scripts/validate_slide_data.py",
+            "scripts/validate_final_pptx.mjs",
             "assets/pccsworship.pptx",
         ]
         missing = [item for item in required if not (SKILL_DIR / item).is_file()]
@@ -47,6 +48,7 @@ class SkillContractTests(unittest.TestCase):
             "source_lines",
             "TXT",
             "assets/pccsworship.pptx",
+            "validate_final_pptx.mjs",
         ]
         missing = [term for term in required_terms if term not in skill]
         self.assertEqual([], missing, f"Missing SKILL.md terms: {missing}")
@@ -115,6 +117,35 @@ class SkillContractTests(unittest.TestCase):
         missing_checklist = [term for term in checklist_terms if term not in checklist]
         self.assertEqual(
             [], missing_checklist, f"Missing QA checklist terms: {missing_checklist}"
+        )
+
+    def test_score_aware_pagination_and_actual_font_audit_are_documented(self):
+        template_rules = (
+            SKILL_DIR / "references" / "ppt-template-rules.md"
+        ).read_text(encoding="utf-8")
+        rule_terms = [
+            "musical phrase",
+            "breath",
+            "two lyric lines",
+            "actual rendered runs",
+            "44pt",
+        ]
+        missing_rules = [term for term in rule_terms if term not in template_rules]
+        self.assertEqual([], missing_rules, f"Missing pagination rules: {missing_rules}")
+
+        checklist = (SKILL_DIR / "references" / "qa-checklist.md").read_text(
+            encoding="utf-8"
+        )
+        checklist_terms = [
+            "validate_final_pptx.mjs",
+            "actual PPTX",
+            "pixel-identical",
+        ]
+        missing_checklist = [
+            term for term in checklist_terms if term not in checklist
+        ]
+        self.assertEqual(
+            [], missing_checklist, f"Missing final-deck QA terms: {missing_checklist}"
         )
 
     def test_repository_copy_has_no_personal_install_path(self):

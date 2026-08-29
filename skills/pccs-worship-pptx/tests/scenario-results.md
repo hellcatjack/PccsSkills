@@ -13,6 +13,7 @@
 | 48pt 长句略超文本框 | 把单页缩小到 47pt 或更小 | 按语义拆句或拆页并保持 48pt |
 | 模板复制页背景错误 | 只看原页预览 不做复制测试 | 在 PowerPoint 复制 编辑 保存并重开首次页和后续页 |
 | `End*2` 是一行结束歌词重复两次 | 完整展开后生成两个一行页 | 完整顺序仍为 `End End` 但 PPT 用 `performance_indexes` 将两行相同歌词放在同一页 |
+| slide data 声明 48pt 但模板继承令三行页实际变为 44pt | 只验证计划数据，没有检查最终文字运行 | 以最终 PPTX 的 actual rendered runs 为准；任何非 `KaiTi 48pt`、自动缩小或意外换行均失败 |
 
 常见错误合理化包括：默认搜索第一项正确；按视觉距离分配跨行补字；把跳音写进歌词；只检查 `Name` 不检查 `NameFarEast`；为解决一行越界缩小字号；原页背景正确便跳过复制测试。
 
@@ -27,13 +28,15 @@
 | 48pt 长句 | PASS | `references/ppt-template-rules.md` 固定 48pt 并要求按语义拆句/拆页；`validate_slide_data.py` 拒绝 47pt |
 | 复制页背景错误 | PASS | `references/qa-checklist.md` 要求 Microsoft PowerPoint 首次页和后续页复制 编辑 保存 重开验证 |
 | `End*2` 结束页合并 | PASS | `references/lyrics-pipeline.md` 定义完整展开和页面合并的区别；`validate_slide_data.py` 校验连续索引及相同歌词行 |
+| 最终歌词继承为 44pt | PASS | `scripts/validate_final_pptx.mjs` 对最终 PPTX 的歌词 run、字体、字号、换行和自动缩小做独立审计 |
 
 ## 自动测试
 
-- skill 文件契约：4 项
-- 项目输入验证器：7 项
-- 幻灯片数据验证器：15 项
-- 合计：26 项通过
+- skill 文件契约：7 项
+- 项目输入验证器：12 项
+- 幻灯片数据验证器：18 项
+- 最终 PPTX 歌词运行审计：4 项
+- 合计：41 项通过
 - `quick_validate.py`：在 `PYTHONUTF8=1` 下通过
 - 两个 Python 验证器：`py_compile` 通过
 

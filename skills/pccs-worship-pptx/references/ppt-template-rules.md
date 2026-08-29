@@ -41,6 +41,7 @@ For a refined, themed, or content-adapted deck, apply `visual-style.md` in addit
 - Continuation-page song-name size, weight, and position come from the template unless the user supplies a newer rule.
 - Do not switch lyric body sizes between slides.
 - Never use automatic font shrinking. Select scripture exceptions explicitly and verify them by rendering.
+- Do not trust slide-plan declarations or inherited template styles as proof of lyric sizing. Inspect the actual rendered runs in the final PPTX: every non-empty lyric run must resolve to `KaiTi` at exactly `48pt`. An inherited `44pt` run is a failure even when `body_font_pt` says `48`.
 - Preserve template text colors in template-faithful mode. In refined mode, use the element-specific fills and text shadows from `visual-style.md`; apply text shadow to the font, not to the text-box shape.
 
 ## Content Layout
@@ -49,7 +50,8 @@ For a refined, themed, or content-adapted deck, apply `visual-style.md` in addit
 - Use at most three lyric lines per slide. This limit does not apply to an explicitly requested scripture slide.
 - Keep each logical line as one paragraph and disable unwanted automatic wrapping.
 - Remove lyric punctuation; retain single spaces between lyric phrases.
-- Prefer two or three balanced lines. One-line pages are allowed for a meaningful ending or when combining would harm legibility.
+- When a score or lyric image is available, treat complete musical phrases, breath points, rests, and cadences as the primary pagination boundaries. Prefer two lyric lines per slide when that follows the musical phrase and improves breathing; use three only when the phrase structure still reads naturally and every actual rendered run remains `48pt`. One-line pages are allowed for a meaningful ending or when combining would harm legibility.
+- Keep repeated instances of the same section on the same phrase-based pagination unless the verified performance changes the phrasing.
 - If a 48pt line does not fit, split at a semantic phrase boundary. Do not reduce the font.
 - Song title, lyric body, logo, and church identity must not overlap or leave their intended bounds.
 
