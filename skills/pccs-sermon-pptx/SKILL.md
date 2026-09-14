@@ -19,7 +19,7 @@ Read before editing:
 
 1. [references/input-contract.md](references/input-contract.md) for source, video, output, and discovery.
 2. [references/preservation-and-layout.md](references/preservation-and-layout.md) for hard line breaks, media replacement, scripture spacing, and capacity exceptions.
-3. [references/visual-style.md](references/visual-style.md) for cover-led illustration, STKaiti typography, text shadow, and video-safe geometry.
+3. [references/visual-style.md](references/visual-style.md) for cover-led illustration, default typography, authorized cover-display typography, text shadow, and video-safe geometry.
 4. [references/qa-checklist.md](references/qa-checklist.md) before delivery.
 
 ## Workflow
@@ -27,7 +27,7 @@ Read before editing:
 1. Discover the exact deck and likely video with `scripts/discover_sermon_inputs.ps1`; a user-named file wins.
 2. Inventory the source with `scripts/inventory_sermon_pptx.ps1`.
 3. Inspect every slide, group continuous page families, and define one layout-spec rule per family before editing.
-4. Edit a new candidate with native PowerPoint automation. Keep text editable, use the cover style, apply text shadow, and use the video-safe height.
+4. Edit a new candidate with native PowerPoint automation. Keep text editable, use the cover style, apply text shadow, use the video-safe height, place cover text in a natural quiet zone before adding edge treatments, and pass the cover-title contrast gate at delivery size.
 5. For a soft cover, preserve camera, people, objects, negative space, palette, and lighting; generate no text. Replace the inventoried picture shape's unique media with `scripts/replace_cover_media.ps1`.
 6. For scripture groups, declare `verseStartSpaceBefore` and run `scripts/apply_scripture_spacing.ps1`. Start with `4pt` before later verses and `1pt` after body; use `0pt` after only on dense exceptions.
 7. Run `scripts/qa_sermon_pptx.ps1`, render with `scripts/render_sermon_pptx.ps1`, inspect every slide at full size, and rerun QA on the final file.
@@ -37,6 +37,7 @@ Read before editing:
 | Need | Source of truth |
 |---|---|
 | Cover redraw and sacred style | `visual-style.md` |
+| Cover-title contrast over mixed light/dark imagery | `visual-style.md` |
 | Picture ID, media preservation, verse spacing | `preservation-and-layout.md` |
 | Layout and structure validation | layout JSON + `qa_sermon_pptx.ps1` |
 
@@ -46,9 +47,10 @@ Read before editing:
 - Do not replace the deck by rebuilding it in a way that loses PowerPoint object IDs or animations.
 - Do not use `Fill.UserPicture` on a PowerPoint picture shape; use the media script on the candidate.
 - Scripture spacing must use `LineRuleBefore = 0` and `LineRuleAfter = 0`; `-1` makes `SpaceBefore` a line multiple.
-- Do not mix title and body font families. The approved default is `STKaiti`; different title/body sizes are expected.
+- Use `STKaiti` as the approved default for ordinary title/body slides. If the user explicitly authorizes a more suitable cover display font, use one coordinated installed family for the cover title and scripture; do not propagate that exception to ordinary content slides.
 - Do not change font size or paragraph spacing on an isolated page until rendering proves the standard rule does not fit.
 - Do not add busy graphics behind scripture. Deep backgrounds, light text, restrained gold, and quiet negative space create the sacred atmosphere.
+- Do not approve a cover title that relies on shadow alone over mixed light/dark imagery. First relocate it into a natural quiet zone and choose a locally contrasting fill; use a quiet backing only if composition cannot solve the problem. A visible outline is the last resort, not the default.
 - Do not claim completion without source-versus-candidate QA and individual full-size rendering of every slide.
 
 ## Common Failures
@@ -59,6 +61,7 @@ Read before editing:
 | Verse gaps become enormous | Spacing is in lines, not points. |
 | Wrong shape is edited | `Shapes.Item(number)` used an index; find the shape by `Id`. |
 | QA ignores verse gaps | The layout group lacks `verseStartSpaceBefore`. |
+| Title reads in the center but disappears over clouds or light | Move it to a naturally quieter band first, choose the display font and fill for that local background, then test both brightness extremes at full and thumbnail sizes. |
 
 ## Deliverables
 

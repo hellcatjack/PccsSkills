@@ -22,7 +22,7 @@ Delivery is blocked until all applicable checks pass.
 
 ## Typography and Layout
 
-- [ ] One font family is used throughout; default `STKaiti`.
+- [ ] One font family is used throughout ordinary title/body slides; default `STKaiti`. If the user explicitly approved a cover display font, the cover title and scripture use one coordinated installed family and the exception does not leak into ordinary content slides.
 - [ ] Titles and body use the approved sizes for their page family.
 - [ ] Continuous scripture pages share one exact title/body geometry.
 - [ ] Continuous sermon-content pages share one exact title/body geometry.
@@ -32,6 +32,10 @@ Delivery is blocked until all applicable checks pass.
 - [ ] Scripture paragraphs have `LineRuleBefore = 0` and `LineRuleAfter = 0`; no value is being interpreted as line multiples.
 - [ ] Any `20–21pt` body or spacing exception is caused by verified capacity and documented.
 - [ ] Text shadow is present and subtle on all visible text.
+- [ ] The cover title was checked against both the brightest and darkest representative background areas at its actual placement; the main glyph has at least `4.5:1` contrast against its local backing.
+- [ ] Cover text was first placed in a naturally quiet, locally uniform background region; a backing or edge treatment was considered only after composition and fill color were tested.
+- [ ] Any cover outline does not create a poster-like or mechanical edge; visible outline is absent unless no balanced placement/backing solution passes the readability gate.
+- [ ] Title and scripture remain immediately readable in both the `1280×720` render and a `640×360` downscaled view.
 
 ## Visual and Video
 
