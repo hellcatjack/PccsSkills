@@ -27,6 +27,44 @@ def _reason(item: dict[str, Any], label: str, errors: list[str]) -> None:
         errors.append(f"{label} requires a nonempty semantic reason")
 
 
+def _rectangle(value: Any, label: str, errors: list[str]) -> dict | None:
+    if not isinstance(value, dict) or any(
+        type(value.get(k)) is not int for k in ("x", "y", "width", "height")
+    ):
+        errors.append(f"{label} requires integer x, y, width, height")
+        return None
+    if value["width"] <= 0 or value["height"] <= 0:
+        errors.append(f"{label} requires positive dimensions")
+        return None
+    if any(value[k] % 2 for k in ("x", "y", "width", "height")):
+        errors.append(f"{label} must use even pixel coordinates for yuv420p")
+    return value
+
+
+def _inset_layout(layout: dict, errors: list[str]) -> None:
+    ppt = _rectangle(layout.get("pptRect"), "pptRect", errors)
+    pastor = _rectangle(layout.get("pastorRect"), "pastorRect", errors)
+    _rectangle(layout.get("pastorCrop"), "pastorCrop", errors)
+    for label, rect in (("pptRect", ppt), ("pastorRect", pastor)):
+        if rect and (rect["x"] < 0 or rect["y"] < 0 or
+                     rect["x"] + rect["width"] > 1920 or
+                     rect["y"] + rect["height"] > 1080):
+            errors.append(f"{label} must stay inside the canvas")
+    if ppt and ppt["width"] * 9 != ppt["height"] * 16:
+        errors.append("pptRect must preserve the 16:9 PPT aspect ratio")
+    if ppt and pastor and (
+        max(ppt["x"], pastor["x"]) < min(ppt["x"]+ppt["width"], pastor["x"]+pastor["width"])
+        and max(ppt["y"], pastor["y"]) < min(ppt["y"]+ppt["height"], pastor["y"]+pastor["height"])
+    ):
+        errors.append("pptRect and pastorRect must not overlap")
+    crop = layout.get("pastorCrop", {})
+    cw, ch = _number(crop.get("width")), _number(crop.get("height"))
+    if pastor and cw and ch and not math.isclose(
+        cw / ch, pastor["width"] / pastor["height"], rel_tol=1e-6
+    ):
+        errors.append("pastorCrop and pastorRect aspect ratios must match; do not stretch")
+
+
 def validate_plan(plan: dict[str, Any]) -> list[str]:
     errors: list[str] = []
     duration = _number(plan.get("duration"))
@@ -76,11 +114,14 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
     pastor_width = _number(layout.get("pastorPanelWidth"))
     if canvas_width != 1920 or canvas_height != 1080:
         errors.append("canvas must be 1920x1080")
-    if None not in (ppt_width, pastor_width, canvas_width) and not math.isclose(
+    inset = "pptRect" in layout or "pastorRect" in layout
+    if inset:
+        _inset_layout(layout, errors)
+    elif None in (ppt_width, pastor_width, canvas_width) or not math.isclose(
         ppt_width + pastor_width, canvas_width, abs_tol=1e-6
     ):
         errors.append("PPT and pastor widths must fill the canvas width")
-    if (
+    if not inset and (
         ppt_height is None
         or ppt_y is None
         or canvas_height is None
@@ -108,6 +149,24 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
     ):
         errors.append("pastorCrop must stay inside the source video")
 
+    camera_input = plan.get("cameraInput", {"mode": "source"})
+    if camera_input.get("mode") not in ("source", "processed-panel"):
+        errors.append("cameraInput.mode must be source or processed-panel")
+    if camera_input.get("mode") == "processed-panel":
+        rect = layout.get("pastorRect", {})
+        if not inset or any(camera_input.get(k) != rect.get(k) for k in ("width", "height")):
+            errors.append("processed-panel dimensions must exactly match pastorRect")
+
+    if "cameraForbiddenBefore" in intro or "coverUntil" in intro:
+        forbidden = _number(intro.get("cameraForbiddenBefore", 0))
+        cover_until = _number(intro.get("coverUntil"))
+        if forbidden is None or forbidden < 0 or forbidden > duration:
+            errors.append("intro.cameraForbiddenBefore must stay inside duration")
+        if cover_until is None or full_until is None or not 0 <= cover_until <= full_until:
+            errors.append("intro.coverUntil must be within the initial full-screen interval")
+        if forbidden is not None and cover_until is not None and cover_until < forbidden:
+            errors.append("intro.coverUntil must cover cameraForbiddenBefore")
+
     segments = plan.get("pptSegments")
     if not isinstance(segments, list) or not segments:
         errors.append("pptSegments must be a nonempty list")
@@ -120,7 +179,7 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             source_end = _number(segment.get("sourceEnd"))
             target_start = _number(segment.get("targetStart"))
             target_end = _number(segment.get("targetEnd"))
-            if None in (source_start, source_end) or source_end <= source_start:
+            if None in (source_start, source_end) or source_start < 0 or source_end <= source_start:
                 errors.append(f"{label} source range must be positive")
             if None in (target_start, target_end) or target_end <= target_start:
                 errors.append(f"{label} target range must be positive")
@@ -128,8 +187,12 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             if not math.isclose(target_start, previous_end, abs_tol=1e-6):
                 errors.append("pptSegments target ranges must be contiguous")
             previous_end = target_end
-            if not isinstance(segment.get("slide"), int) or segment["slide"] < 1:
+            if type(segment.get("slide")) is not int or segment["slide"] < 1:
                 errors.append(f"{label}.slide must be a positive integer")
+            if (_number(intro.get("coverUntil")) is not None and
+                target_start < float(intro["coverUntil"]) and
+                segment.get("slide") != intro.get("coverSlide", 1)):
+                errors.append(f"{label} must show intro.coverSlide through coverUntil")
         if not math.isclose(previous_end, duration, abs_tol=1e-6):
             errors.append("pptSegments must cover the complete duration")
 
@@ -148,6 +211,8 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
             continue
         if start < previous_end:
             errors.append("fullScreenBlocks must not overlap")
+        if split_complete is not None and start < split_complete:
+            errors.append("fullScreenBlocks must not overlap the intro; extend intro.fullUntil instead")
         if ordinary_transition is not None and end - start <= 2 * ordinary_transition:
             errors.append(f"{label} is too short for both transitions")
         previous_end = end
@@ -156,6 +221,8 @@ def validate_plan(plan: dict[str, Any]) -> list[str]:
     ending_start = _number(ending.get("start"))
     ending_complete = _number(ending.get("complete"))
     ending_end = _number(ending.get("end"))
+    if split_complete is not None and ending_start is not None and split_complete > ending_start:
+        errors.append("intro must complete before endingCover starts")
     if ending.get("mode") != "left-cover-right-pastor":
         errors.append("endingCover.mode must be left-cover-right-pastor")
     if not isinstance(ending.get("coverSlide"), int) or ending.get("coverSlide", 0) < 1:

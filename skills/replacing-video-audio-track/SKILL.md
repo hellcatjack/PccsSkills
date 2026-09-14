@@ -11,6 +11,14 @@ Treat the video timeline as authoritative: **视频时间轴是唯一基准**. L
 
 This skill intentionally permits trimming the external recording to the matching video interval. It does not permit trimming, extending, slowing, speeding, or re-encoding the video.
 
+## Landscape 4K handoff and continuing work
+
+- Future PCCS recordings normally use landscape 4K. Probe actual fps, timestamps, rotation and streams; preserve the original 4K video packets, dimensions and color metadata through this audio-only stage. Do not downscale or denoise the picture here.
+- Keep alignment and restoration as separate verified stages. When both are already requested, complete the authorized sequence without asking again; pass the final accepted video path, selected audio stream, hashes, alignment evidence and unchanged picture timeline to composition.
+- If the user accepts a small existing offset and says to stop adjusting, retain that decision and continue the downstream task. Do not launch another millisecond search. Record user acceptance separately from measured synchronization; never change a failed measurement into PASS.
+- Reuse full alignment evidence only when both input hashes, selected stream, timing origin and analysis settings match. During a long tool run, continue independent source/PPT inventory if available; retain job IDs and bounded waits. A correction during work changes the relevant decision, not all completed evidence. After interruption, verify saved jobs/results before resuming.
+- Transcription and sampled video frames support AI judgment; do not assume a GPT-6 host directly ingests raw audio/video or that an asynchronous tool has completed before its result arrives.
+
 ## Required workflow
 
 1. Inventory the requested directory. Resolve the exact video, external audio, target video-audio ordinal, and output path. If more than one candidate remains plausible, stop and ask.

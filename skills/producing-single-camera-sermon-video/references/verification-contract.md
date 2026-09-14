@@ -1,36 +1,47 @@
 # Verification contract
 
-A formal output passes only with fresh evidence for every applicable item.
+A formal output passes only with fresh evidence for every applicable item, tied to the exact candidate hash. Reusable source evidence must be linked to matching immutable input hashes. A structural plan pass or successful encode is not acceptance.
 
-## Media and timeline
+## Media, clock and source roles
 
-1. Probe the final MP4: H.264, 1920×1080, constant 30 fps, `yuv420p`, AAC, expected channel layout, and start time zero.
-2. Confirm `videoFrames == expectedFrames == round(duration × 30)`.
-3. Keep video, audio, and container duration differences within one frame. Do not hide a mismatch with `-shortest`.
-4. Run a full decode with FFmpeg `-xerror`; require exit code zero and empty error output.
+1. Probe MP4/H.264, 1920×1080, CFR 30, SAR 1, `yuv420p`, AAC, expected channels/color and program start zero.
+2. Confirm `videoFrames == expectedFrames == round(duration*30)`; inspect all frame timestamps for CFR and cumulative drift, not only the average-rate metadata.
+3. Compare video/audio/container durations with the locked audio. Each difference must be within one frame. Never use `-shortest` to hide a mismatch.
+4. Run a full decode with FFmpeg `-xerror`; require zero exit status and no decode errors.
+5. Verify `pictureSourceVideo` provenance and frame mapping against the accepted master at beginning/middle/end and any cuts. Different take, source fps or start offset cannot be accepted merely because durations resemble each other.
+6. Verify a processed panel's dimensions, complete frame count, timebase, no-audio state, chunk core/context ranges and absolute-index assembly. Hidden placeholders must never enter a positive-opacity pastor frame.
 
 ## Audio identity
 
-Compare the input-video audio packet hash with the final audio packet hash. The audio packet hash must match exactly; this is mandatory for every output made by this Skill. No PCM-hash fallback is permitted because decoded equality cannot prove that the workflow avoided processing or re-encoding.
+Compare selected input-video audio packets with final audio packets: the audio packet hash must match exactly, including payload order and packet count. No PCM-hash fallback is permitted: decoded equality alone does not prove stream copy.
 
-Probe both streams and confirm codec, sample rate, channel count/layout, start time, duration, language tag, disposition, metadata, packet count, and packet payload order are unchanged. Audit the final mux command: it must map the audio stream from the same input video, use `-c:a copy`, and contain no audio filter, audio encoder, fade, gain, normalization, compressor, limiter, restoration, denoising, dereverberation, declipping, tempo, trim, padding, delay, timestamp transform, channel conversion, or resampling operation.
+Check codec, sample rate, channels/layout, start, duration, language, disposition and metadata. Compare packet PTS/DTS/duration in normalized time units when time bases differ. Audit that the final command maps the locked `audioSourceVideo` stream and uses `-c:a copy`, with no audio filter/encoder, restoration, gain, fade, trim, padding, delay, tempo, channel conversion or resampling.
 
-If exact packet identity cannot be established, or direct stream copy is unsupported, fail verification and stop and request a newly audio-treated input video. Do not substitute a decoded file or relax the comparison.
+If exact identity cannot be established, fail this gate and diagnose the mismatch. A missing measurement is not an audio defect: collect the missing evidence before requesting a replacement source. Unsupported copy input requires an explicitly resolved upstream audio master. Preserve a user-accepted residual camera/audio offset; do not label it a newly measured zero offset or silently adjust it.
 
-## PPT and composition
+## PPT, opening and composition
 
-1. Extract stable frames for every `pptSegments` instance, not merely every unique slide. Compare each frame with the correct PowerPoint reference.
-2. Compare all repeated page pairs and explicitly verify the second pass background, master graphics, fonts, and images.
-3. At every page boundary, extract before/after frames and confirm the planned semantic page change.
-4. At every animation trigger, extract before/after frames and confirm the intended object and trigger grouping.
-5. At the opening transition and every full-screen block, extract frames before, during, stable, during exit, and after. Confirm smooth motion, correct page identity, readable frames, and no black/white flash.
-6. Compare the output pastor panel with the planned fixed crop from the camera source. Require the lectern and intended gesture area to remain visible.
-7. Check the ending before, during, and after the cover transition and near the final frame. Confirm the left cover remains correct and the right pastor remains continuously visible in `left-cover-right-pastor` mode.
+1. Compare a stable frame from **every page instance**, including repeated slides, with the correct native PowerPoint final-state reference. Verify backgrounds, masters, text, fonts and images.
+2. Inspect before/after frames at every page boundary; check the complete spoken sentence and avoid cutting a verse early.
+3. Inspect before/after frames at every independent animation trigger; verify object identity, order, duration and `With Previous`/`After Previous` grouping.
+4. Verify the whole initial exclusion interval frame by frame against the authentic cover and check the first permitted camera transition. No camera-setup pixels may leak through. Continue audio from zero.
+5. Inspect **every consecutive frame** across each intro, focus and ending transition, plus stable frames before/after. Confirm no flash, stretched slide, moving crop, missing background, clipped heading or unexpected half-visible text. A sparse contact sheet alone does not cover all transition frames.
+6. Inspect pastor framing across representative posture/gesture extremes, even for a fixed camera. Preserve recorded lectern detail and intended gestures without inventing unrecorded objects. Check the crop and uniform scaling against the plan.
+7. Check `left-cover-right-pastor` before/during/after the final cover transition, throughout prayer and near the last frame. Preserve the complete tail.
+8. Re-listen to all low-confidence semantic boundaries and record the decision. A number computed from ASR cannot replace that review.
 
-## Integrity
+## Denoising and visual comparison
 
-- Recalculate the input video, PPTX, PowerPoint native video, and preserved prior outputs against their baseline hashes.
-- Preserve every original and prior formal output.
-- Write a JSON report listing each check, expected value, measured value, evidence path, and pass/fail state.
+Compare source and selected candidate motion clips at identical timestamps, display size, color conversion and compression settings. Check skin, eyes, moving hands and lectern edges for smear, ghosting, flicker or detail loss. Review processed-chunk entries/exits with temporal context.
 
-Any missing measurement or failed check blocks delivery. A successful encoder exit, a contact sheet, or “looks correct” is not a substitute for the required evidence.
+In the final composite, compare visible pastor viewports with the selected processed reference; compare PPT separately with native slides. Skip intentionally covered pastor pixels during full-screen focus; do not substitute a different timestamp silently. Record sample time and visibility.
+
+For quantitative comparisons, align crop, resolution, SAR and colorspace first. Convert both images consistently **before** downscaling; RGB-versus-YUV scaling can otherwise create misleading errors. Record thresholds and rationale before judging results. Investigate mismatches; do not lower thresholds merely to pass. A wall-patch noise reduction is a local measurement, not a whole-video sharpness score.
+
+## Integrity and report
+
+Recompute hashes for all source media, source PPTX and protected prior formal outputs against baseline. Record native render and selected panel hashes when those become verification references. Preserve originals and previous versions.
+
+Write JSON with each check's expected/measured values, evidence path, candidate hash and `PASS`, `FAIL` or `REVIEW_REQUIRED`; use `NOT_APPLICABLE` only with a supported reason (for example, a deck proven to contain no animations). Cast library scalars into real JSON values. Missing evidence or any required failure blocks final promotion.
+
+After a repair, rerun affected visual/semantic gates and all final-file media/audio/integrity gates when encoding or mux changed. Once the exact candidate passes, do not repeat unrelated checks or rerender the sermon for a metadata-only change.

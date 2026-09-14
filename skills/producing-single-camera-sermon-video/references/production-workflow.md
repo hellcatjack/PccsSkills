@@ -1,74 +1,63 @@
 # Production workflow
 
-## 1. Inventory and preserve sources
+## 1. Inventory, immutable sources and timeline
 
-Enumerate the task directory and resolve exactly one input video and one PPTX. Do not select a separate audio file: the input video's embedded audio is already the finished audio master. Probe every media stream and record SHA-256 before work. Keep sources and previous formal outputs immutable; place generated material under the task `_work` directory.
+Resolve the date directory's PPTX, `audioSourceVideo`, selected audio ordinal and `pictureSourceVideo`. Default picture source equals audio source; use original same-take footage only with verified provenance when reprocessing is justified. Hash inputs and protected old outputs. Keep generated material under `_work`.
 
-## 2. Lock the input-video audio
+Probe dimensions, rotation, SAR, codec, pixel format, color primaries/transfer/range, frame rate/timestamps/counts, duration and stream starts. Landscape 4K is the capture expectation, not permission to assume 3840×2160/30 SDR. Normalize the **picture only** when 25/29.97/60 fps, rotation or HDR requires 1080p/30 SDR delivery. Write and verify the source-to-output frame mapping. The visibility helper uses output-frame indexes; source indexes match only for a proven 1:1 timeline. Do not change playback speed to force 30 fps.
 
-The input video's audio stream is the sole authoritative formal audio. The same input video supplies the camera picture, timing reference, and final audio packets.
+The input video's audio stream is the sole authoritative formal audio. Audio may be decoded only for transcription and timing analysis. Lock its path, stream and hash; extracted audio, proxies and denoise chunks are never formal sources. No audio transforms or re-encoding after this lock. Preserve a user-accepted sync discrepancy and record acceptance separately from measured zero-latency evidence.
 
-- Audio may be decoded only for transcription and timing analysis; extracted WAV, PCM, AAC, proxy, or speech-recognition files are analysis evidence only and must never be muxed into the deliverable.
-- Do not search for, align, substitute, or prefer any external audio recording.
-- Do not invoke `replacing-video-audio-track` or `sermon-audio-restoration`.
-- If the embedded audio is missing, wrong, damaged, out of sync, or unsupported for direct MP4 stream copy, stop and request a newly audio-treated input video.
+If an upstream audio stage is already authorized, complete and verify it before locking composition audio. Do not start new alignment/restoration merely because the visual source is noisy or subtitles are requested.
 
-Never use `atrim`, `asetpts`, `adelay`, `apad`, resampling compensation, channel remixing, normalization, compression, limiting, restoration, denoising, dereverberation, declipping, fades, or an audio encoder anywhere in this workflow. Never change audio timestamps, start time, duration, sample rate, channel layout, metadata, or packet payloads.
+## 2. Full semantic evidence
 
-## 3. Read the sermon and presentation
+Use `presentations:Presentations`. Read text, notes, masters, layouts, objects, order, dimensions and all animation sequences. Export final-state PNGs through native PowerPoint.
 
-Use `presentations:Presentations`. Extract all visible text, notes, masters/layouts, page order, dimensions, media, and animation sequences. Render reference PNGs for every final slide state.
+Generate and read the complete transcript with paragraph/word timestamps. Existing evidence is reusable only when selected audio identity, timestamp origin, ASR model/settings and full coverage are verified; record the match. One complete qualified pass plus uncertain-region review suffices for composition. The separate high-precision subtitle skill still requires its two full passes.
 
-Create a complete transcript with paragraph and word timing. Correct scripture, names, and church terms from the PPT and Bible context. Read the complete transcript; programmatic search only locates evidence.
+Use AI context to distinguish opening, reading, prayer, theme transitions, points, examples, recap and closing. PPT wording helps correct names/verses but does not prove an unspoken verse was read. Review uncertain ranges locally with adjacent sentences. Place boundaries at the sentence entering the new topic, not a late keyword or preceding preview.
 
-Build page boundaries at the first sentence that genuinely enters the page's topic. Trigger an animation when its object is first explicitly introduced. Preserve `With Previous`, `After Previous`, delays, durations, and effect order.
+## 3. Auditable plan
 
-## 4. Build the composition plan
+Include `duration`, `fps: 30`, `expectedFrames: round(duration*30)`, source-role evidence, crop inspection, intro exclusions, transitions, `layout`, `pptSegments`, `fullScreenBlocks` and `endingCover`.
 
-The JSON plan contains:
+- Each page instance has `slide`, `sourceStart`, `sourceEnd`, `targetStart`, `targetEnd`, `reason` and spoken evidence/confidence. Source ranges refer to native PPT video; target ranges are contiguous and cover complete audio.
+- Each animation records original ID, object, effect, order, trigger group, duration and planned absolute/relative onset. Preserve `With Previous`. For `After Previous`, subtract the previous effect's duration when computing relative delay.
+- Geometry uses integer even-pixel `pptRect`/`pastorRect`, actual source dimensions and `pastorCrop`. The inset renderer requires a 16:9 PPT canvas; other ratios need a separately verified letterbox adaptation.
+- Opening uses `coverSlide`, `coverUntil`, `cameraForbiddenBefore`, `fullUntil`, `splitComplete`. Focus blocks cannot overlap intro/ending. Generated transitions and visibility boundaries must be on the 30 fps grid; retain original spoken times before rounding.
+- `cameraInput.mode` is `source` or `processed-panel`. A processed panel declares width/height matching `pastorRect`, contains the complete output timeline and has no audio.
 
-- `duration`, `fps`, and `expectedFrames`;
-- intro and transition durations;
-- source/canvas/crop geometry in `layout`;
-- one `pptSegments` entry per page instance with `slide`, source range, target range, and `reason`;
-- semantic `fullScreenBlocks`, each with `start`, `end`, and `reason`;
-- an `endingCover` boundary using `left-cover-right-pastor`.
-
-The source ranges refer to the PowerPoint native video. The target ranges cover the complete sermon continuously, including every repeated page instance.
-
-Validate before encoding:
+From the installed skill directory (use real task paths):
 
 ```powershell
 python scripts/validate_composition_plan.py <plan.json>
+python scripts/plan_camera_processing.py --plan <plan.json> --context-frames <combined-radius> --output <camera-plan.json>
 python scripts/build_dynamic_filter.py --plan <plan.json> --output <filter.txt>
 ```
 
-These tools validate and render declared decisions. They never choose the decisions.
+The validator checks geometry/time structure, not media identity, animations, visual correctness or semantic truth. Its pass is not full acceptance. The camera planner declares work; it does not run a denoiser or assemble clips. Read [camera-denoising.md](camera-denoising.md) for processing and reconstruction.
 
-## 5. Render PowerPoint
+## 4. Native PPT and camera processing
 
-Write timings only into a copy of the PPTX, reopen it, and re-read the saved settings. Use Microsoft PowerPoint `CreateVideo` for PowerPoint native animation, transitions, fonts, and layout. Target 1920×1080 at constant 30 fps. If the deck repeats, make the native source contain or expose every required page instance with its correct background.
+Write automatic timings only into a PPTX copy, close/reopen and verify saved page durations/animation groups against the plan. Use PowerPoint native `CreateVideo` for effects and transitions. A static alternative requires proof that no effects need preservation and every page matches. Do not replace an animated deck with screenshots when COM is unavailable.
 
-If the deck has no animation, a static alternative is allowed only after every page render matches the source. Static rendering is never a fallback for an animated deck.
+Adjust native PPT **video timing only** for export rounding, and recheck animations on the final clock. Verify repeated-page backgrounds. Camera processing and PPT work can run independently when resources allow. Avoid simultaneous GPU ASR, neural denoising and heavy GPU encoding when they contend for memory.
 
-## 6. Compose video
+## 5. Compose, then mux
 
-The generated filter expects:
+Filter inputs: 0 native timed PPT video; 1 original picture source or processed panel; 2 duration-matched authentic cover clip. Map only `[outv]` into the visual intermediate. Panel mode does not re-crop or denoise input 1. Optional headings need a reviewed graph extension.
 
-- input 0: timed PPT video;
-- input 1: camera video;
-- input 2: a duration-matched cover clip derived from the authentic first slide.
+Encode H.264, 1920×1080, CFR 30, `yuv420p`, SAR 1 and exactly `expectedFrames`. Start from reliable native/raw assets and a lossless or visually verified high-quality panel intermediate. Do not repeatedly transcode old deliverables. Probe the visual stream before mux.
 
-Map only `[outv]` into the visual intermediate. Encode H.264, 1920×1080, constant 30 fps, `yuv420p`, with exactly `expectedFrames`. Use a high-quality source or lossless intermediate; do not repeatedly transcode an earlier compressed deliverable.
-
-## 7. Mux the immutable input-video audio
-
-Add audio only after the visual program passes a probe. Map the visual stream from the composition and map the audio stream from the same input video used throughout the task. Use `-c:a copy` without an audio filter, audio encoder, or timestamp transform. Never add `-shortest`; preserve every source audio packet, start time, language tag, disposition, metadata, and the complete ending.
-
-A representative final-mux shape is:
+In the final mux, map the audio stream from the same input video locked as `audioSourceVideo`:
 
 ```powershell
-ffmpeg -i <visual-intermediate.mp4> -i <input-video.mp4> -map 0:v:0 -map 1:a:0 -c:v copy -c:a copy <new-output.mp4>
+ffmpeg -i <visual.mp4> -i <audioSourceVideo.mp4> -map 0:v:0 -map 1:a:<selected-ordinal> -c:v copy -c:a copy <new-candidate.mp4>
 ```
 
-Record the executed command. The audit must prove that input 1 is the original task video, that `1:a:0` is the mapped audio, and that no command before or during final mux modifies the audio.
+Preserve metadata/disposition explicitly where needed and audit the actual command/result. Never add `-shortest`, audio filters, trimming, resampling or timestamp shifts. The audio packet hash must match exactly. Compare normalized timestamps, not raw integer ticks when container time bases differ.
+
+## 6. Verify and promote
+
+Run the complete [verification contract](verification-contract.md) on the immutable candidate. Numerical checks and visual/semantic review can run independently against that same file. A changed candidate invalidates affected evidence. Promote only after every gate passes and report its exact hash. An older report cannot certify a new encode.

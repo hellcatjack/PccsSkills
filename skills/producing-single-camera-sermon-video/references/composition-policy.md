@@ -1,51 +1,42 @@
 # Composition policy
 
-## Communication job
+## Landscape capture and stable framing
 
-The congregation must be able to read the teaching material while still seeing the preacher's presence and gestures. Visual changes reinforce the sermon structure; they do not compete with it.
+Inspect actual metadata and frames near the beginning, middle, end, page transitions, wide gestures, leaning and prayer posture. A fixed camera still records a moving person. Preserve the head, useful hand area and recorded lectern detail needed for the composition. If the physical lectern base is outside the original recording, document that boundary; do not fabricate it or reject a sound crop for missing unrecorded pixels.
 
-## Establish one stable pastor crop
+Choose one fixed crop; avoid tracking, digital pans and side changes. Remove irrelevant wall/aisle before reducing gesture space. Check headroom, eye line, body scale, microphone clearance and visual balance at native output size. Scale uniformly: crop and panel aspect ratios must match.
 
-1. Inspect one representative frame from the fixed-camera recording. Inspect additional frames only when the source itself changes framing, lighting, zoom, or obstruction.
-2. Keep the full lectern and the pastor's useful hand-gesture area. Remove empty wall, unused aisle, and irrelevant left/right space first.
-3. Choose a fixed crop for the entire program. Do not pan, track, or alternate sides to simulate another camera.
-4. Place the pastor on the side supported by gesture direction and sightline. A source in which the pastor gestures toward the left usually belongs in the right panel.
-5. Make the panel only as wide as needed for a balanced human figure and lectern. Give the remaining width to the PPT.
+## Default starting preset: landscape inset A
 
-For a 1920×1080 canvas and a 16:9 deck, a proven starting geometry is a 1560-pixel PPT region and a 360-pixel pastor panel. Fit the full slide inside the PPT region without cropping; derive the vertical size and centering from the actual deck ratio. Store all dimensions and crop coordinates in the plan rather than embedding them in code.
+For a 1920×1080 canvas and 16:9 slides:
 
-## Opening
+| Element | x | y | width | height |
+| --- | ---: | ---: | ---: | ---: |
+| PPT viewport | 40 | 198 | 1216 | 684 |
+| Pastor viewport | 1280 | 198 | 600 | 684 |
 
-- Begin with the PPT cover full-screen for five seconds by default.
-- Start audio at program time zero; the cover hold never delays audio.
-- Transition to split view over roughly 0.65–0.8 seconds with smoothstep-like easing. Avoid hard cuts, black flashes, or a shrinking slide over an unprepared background.
+Use a restrained dark canvas, for example `#171B1F`. The panels share a baseline and a 24-pixel gap; the complete slide remains visible. Store these as `layout.pptRect` and `layout.pastorRect`. Derive `pastorCrop` from **this recording**, not a prior week. Check slide readability and adapt the preset when needed.
 
-## Normal and focus modes
+The bundled filter builds panels and focus transitions. Optional title/scripture graphics require a separately authored, verified overlay. Place them in the upper margin; fade the complete heading layer out before the expanding PPT reaches it. Do not leave half a heading clipped during a zoom. Check every consecutive transition frame. Legacy edge-to-edge 1560/360 plans remain supported, but are not the new capture default.
 
-Normal mode shows the full PPT at maximum size in the left region and the fixed crop of the pastor on the right. Use a subtle derived background only to fill unavoidable letterbox space.
+## Opening protection
 
-Use full-screen PPT when the audience needs maximum reading or visual concentration, such as:
+- Record `intro.cameraForbiddenBefore` from the current user exclusion or inspected setup footage. It is **not a fixed 16-second rule** for future recordings.
+- Record `coverSlide` and `coverUntil`; require `cameraForbiddenBefore <= coverUntil <= fullUntil < splitComplete`. `fullUntil` ends the initial full-screen PPT period; it may extend beyond the cover into reading.
+- Audio starts at zero. Covering setup footage does not cut or delay either timeline.
+- If cover is followed immediately by reading, continue into full-screen scripture and introduce the pastor at a useful semantic boundary. Avoid a one-second split-view flash.
+- Use frame-aligned smooth ramps, usually 24 frames at 30 fps. Duration is configurable, not a page-timing algorithm.
 
-- a complete scripture reading;
-- the first clear statement of a major point;
-- a dense verse or list being explained line by line;
-- a map, diagram, or image central to the current argument;
-- a short synthesis where the slide itself carries the message.
+## Normal, focus and repeated slides
 
-Return to split view when the preacher moves into explanation, illustration, application, interaction, or prayer. Medium frequency means a few meaningful focus blocks across the sermon, not a fixed interval. Each block requires a transcript/PPT reason and enough time for both transition ramps plus a stable hold.
+Normal mode keeps both panels stable. Expand PPT to full-screen for complete reading, dense verse explanation, first presentation of a major point, important diagrams or synthesis. Each `fullScreenBlocks` interval includes ramp-in, stable hold and ramp-out, with its own semantic reason. Do not schedule focus on a timer.
 
-Keep the pastor location unchanged while the PPT grows over the pastor panel. Fade or mask the pastor as the slide reaches full width, then restore the same crop when focus ends.
+Fade the fixed pastor panel as the PPT grows and restore the identical crop on return. Only fully opaque PPT intervals can be skipped during camera processing; transition frames still need the pastor.
 
-## Repeated slides
+Model every repeated page instance. After prayer, choose the page appropriate to the next spoken thought: cover, previously read passage or other content. Neither automatic replay nor a blanket ban on returning to the cover is appropriate. Verify every second pass background, master, font and image.
 
-If reading and preaching use the deck twice, model both runs explicitly. The first pass may cover sequential scripture reading; after prayer, the second pass starts at the correct page rather than replaying the cover. Render or retime each repeated page instance so its master, background, font, and images remain intact. Treat a white or missing second pass background as a failed output.
+## Ending and previews
 
-## Ending
+Choose the return-to-cover boundary from the last summary, appeal or closing prayer without interrupting an explanation. Default `left-cover-right-pastor` crossfades only the PPT viewport and preserves the pastor through the complete audio tail. A requested different ending needs an explicit plan and adapted verification; the bundled filter implements this default.
 
-Choose the return boundary from the last summary, appeal, or transition into closing prayer. Do not interrupt an unfinished explanation.
-
-Use `left-cover-right-pastor`: crossfade only the PPT region to the cover while the right-side pastor continues uninterrupted. Hold that composition through the final prayer, final word, room tail, and the end of the immutable input-video audio.
-
-## Preview policy
-
-Create one composition preview before the full encode when the crop or layout is new. Show the full 1920×1080 frame with the actual PPT and representative pastor frame. A previously approved identical source/crop/layout may be reused; do not request redundant previews for a genuinely fixed camera.
+For a new layout, make an actual full-frame composition preview and short transition sample. If the user asks to choose, prepare concrete alternatives before asking. Otherwise proceed within existing authorization. Prior approval carries forward, while new footage still needs framing inspection. Do not re-ask about the same approved layout because encoding or denoising changed.

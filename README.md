@@ -16,7 +16,7 @@
 
 | Skill | 适用场景 | 主要交付 |
 | --- | --- | --- |
-| [`producing-single-camera-sermon-video`](skills/producing-single-camera-sermon-video/SKILL.md) | 将已含最终音轨的固定单机位牧师视频与本地 PPTX 合成为动态讲道成片 | 1920×1080 视频、语义驱动的 PPT 编排、原始音轨码流复制及完整验证 |
+| [`producing-single-camera-sermon-video`](skills/producing-single-camera-sermon-video/SKILL.md) | 横屏 4K 单机位牧师视频与本地 PPTX 合成，支持留白双栏、开头遮挡和牧师画面降噪 | 1920×1080/30 视频、语义 PPT 时间轴、可见片段降噪规划、已认可音轨码流复制与完整验证 |
 
 ### 音频与字幕
 
@@ -33,10 +33,27 @@
 1. 相机音频存在明显缺陷时，先用 `sermon-audio-restoration` 修复独立录音。
 2. 需要把独立录音写回视频时，用 `replacing-video-audio-track` 对齐并替换目标音轨。
 3. 用 `pccs-sermon-pptx` 美化讲道幻灯片，并完成结构与视觉 QA。
-4. 用 `producing-single-camera-sermon-video` 将最终音轨视频与 PPTX 合成为讲道成片。
+4. 用 `producing-single-camera-sermon-video` 锁定已认可音轨，检查横屏 4K 构图，按可见范围裁切、缩放和处理牧师噪点，再与独立的原生 PPT 合成为讲道成片。
 5. 用 `sermon-chinese-subtitles` 对最终视频制作和校验简体中文字幕。
 
 敬拜歌词页与其他主日礼仪页分别使用 `pccs-worship-pptx` 和 `pccs-service-pptx`；混合式主日 PPT 应保留两套 skill 各自的可编辑版式，再进行组合。
+
+### 横屏 4K 制作约定
+
+- 默认拍摄为横屏 4K，交付仍为 1080p/30；每次实测帧率、色彩和时间轴，不假定所有 4K 都是 30 fps SDR。
+- 以留白双栏 A 为构图起点，依据当次人物、讲台与手势重新确定裁切；用户已批准的布局和已接受的微小音画差异持续有效。
+- 摄像机设置阶段由当次 `cameraForbiddenBefore` 指定，使用 PPT 封面遮挡并完整保留音频；不把某一次的 16 秒变成固定规则。
+- 先裁切并缩放到实际显示大小，再降噪牧师可见片段；过渡帧保留，多帧模型补足前后文。PPT 不经过降噪，片段按原始帧索引还原完整时间轴。
+- 原始画面和已优化音轨可以来自同一次拍摄的不同文件，但必须分别锁定来源并验证时间映射。已压软的画面不应反复转码。
+- [GPT-6 执行约定](skills/producing-single-camera-sermon-video/references/gpt6-execution.md)规定异步任务调度、中途需求调整、证据复用与断点恢复；只使用宿主实际提供的能力，不把模型推理当作视频降噪或原生音视频解码。
+
+视频脚本验证与回归测试：
+
+```powershell
+python -m pytest skills/producing-single-camera-sermon-video/tests -q
+```
+
+新增的 `plan_camera_processing.py` 生成可见帧与上下文范围，**不执行神经降噪**；实际处理、性能试片和片段组装要求见 [画面降噪规范](skills/producing-single-camera-sermon-video/references/camera-denoising.md)。构图脚本支持留白双栏和已处理的完整时间轴牧师面板；额外标题图层须单独制作并逐帧核验。
 
 ## PCCS PPT 制作共识
 

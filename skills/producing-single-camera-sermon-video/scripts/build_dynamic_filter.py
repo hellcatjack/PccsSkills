@@ -103,6 +103,8 @@ def build_filter(plan: dict[str, Any]) -> str:
     errors = validate_plan(plan)
     if errors:
         raise ValueError("Invalid composition plan: " + "; ".join(errors))
+    if "pptRect" in plan["layout"]:
+        return _build_inset_filter(plan)
 
     duration = _number(plan["duration"])
     frames = int(plan["expectedFrames"])
@@ -155,6 +157,54 @@ def build_filter(plan: dict[str, Any]) -> str:
             "setpts=N/(30*TB),format=yuv420p[outv]",
         ]
     )
+    return ";\n".join(lines) + "\n"
+
+
+def _build_inset_filter(plan: dict[str, Any]) -> str:
+    """Inset panels, expanding PPT and a separately processed camera input.
+
+    Inputs: 0 native PPT timeline, 1 source camera or full-timeline panel,
+    2 native cover clip. Text/branding belongs in a separately reviewed overlay.
+    No denoising is applied here, so PPT pixels never enter a denoiser.
+    """
+    duration = _number(plan["duration"])
+    layout = plan["layout"]
+    ppt, pastor, crop = layout["pptRect"], layout["pastorRect"], layout["pastorCrop"]
+    pw, ph = pastor["width"], pastor["height"]
+    focus = build_focus_expression(plan, "t")
+    focus_frame = build_focus_expression(plan, "N/30")
+    width = f"trunc(({ppt['width']}+(1920-{ppt['width']})*({focus}))/2)*2"
+    x = f"{ppt['x']}*(1-({focus}))"
+    y = f"{ppt['y']}*(1-({focus}))"
+    ending = plan["endingCover"]
+    camera_filters = f"[1:v]trim=start=0:end={duration},setpts=PTS-STARTPTS,"
+    if plan.get("cameraInput", {}).get("mode", "source") == "source":
+        camera_filters += (
+            f"crop={int(crop['width'])}:{int(crop['height'])}:"
+            f"{int(crop['x'])}:{int(crop['y'])},scale={pw}:{ph}:flags=lanczos,"
+        )
+    camera_filters += "fps=30,setsar=1,format=rgb24[pastorrgb]"
+    lines = _ppt_segment_lines(plan)
+    lines.extend([
+        "[pbgsrc]nullsink",
+        f"color=c=0x171B1F:s=1920x1080:r=30:d={duration}[canvas]",
+        camera_filters,
+        f"color=c=white:s=2x2:r=30:d={duration},format=gray,"
+        f"geq=lum='255*(1-({focus_frame}))',scale={pw}:{ph}:flags=neighbor[pmask]",
+        "[pastorrgb][pmask]alphamerge[pastor]",
+        f"[canvas][pastor]overlay=x={pastor['x']}:y={pastor['y']}:"
+        "shortest=1:eof_action=pass[base]",
+        f"[pfgsrc]scale=w='{width}':h=-2:eval=frame:flags=lanczos,setsar=1,"
+        "format=rgba,pad=1920:1080:x=0:y=0:color=black@0:eval=frame[pfg]",
+        f"[base][pfg]overlay=x='{x}':y='{y}':shortest=1[dynamic]",
+        f"[2:v]trim=start=0:end={duration},setpts=PTS-STARTPTS,fps=30,"
+        f"scale={ppt['width']}:{ppt['height']}:flags=lanczos,setsar=1,format=rgba,"
+        f"fade=t=in:st={_number(ending['start'])}:"
+        f"d={_number(plan['transitions']['endingCover'])}:alpha=1[coverleft]",
+        f"[dynamic][coverleft]overlay=x={ppt['x']}:y={ppt['y']}:shortest=1,"
+        f"fps=30,trim=end_frame={int(plan['expectedFrames'])},"
+        "setpts=N/(30*TB),setsar=1,format=yuv420p[outv]",
+    ])
     return ";\n".join(lines) + "\n"
 
 

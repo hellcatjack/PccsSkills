@@ -7,6 +7,16 @@ description: Use when creating, correcting, retiming, or validating Simplified-C
 
 Create YouTube-ready Simplified-Chinese subtitles whose wording and timing are independently defensible. Formatting success is not timing proof: a structurally valid SRT can still be seconds early or late.
 
+## Reuse and landscape 4K workflow
+
+- Target the explicitly selected final sermon video, whether its source camera was landscape 4K or its final composite is 1080p. Subtitle work does not require a 4K picture decode or a new video encode; extract only the selected audio for analysis.
+- A complete composition-stage ASR pass may satisfy one of the two required full passes only when exact audio identity, timestamp origin, model/configuration, word timestamps and complete coverage match this skill's pass requirements. Record the reuse evidence and run the other qualified full pass; do not replace two complete passes with two excerpts.
+- An old ASR JSON alone may omit audio/context hashes and effective decoding settings. Resolve those from its original run manifest, commands and code version before reuse; otherwise keep it as auxiliary evidence and run the missing qualified pass. The alignment tool can reference a qualified existing pass through `--asr primary=<path>`.
+- Preserve the accepted audio and existing camera/audio offset. A subtitle timing correction changes cue timing, not the video's audio track. The user's request to stop millisecond sync adjustments remains in force unless explicitly reopened.
+- While local ASR runs, use GPT-6 for independent PPT/context inventory through available tools. Save job IDs, ASR settings, hashes, review decisions and unresolved cues under `_work`; resume from verified state after interruptions. Do not assume native raw audio/video input support or mark a pending listening review PASS from transcript text alone.
+- Carry mid-task corrections into affected cues and their verification, keeping valid complete-transcript evidence. Do not rerun entire ASR passes for a spelling-only correction when the audio and required pass evidence are unchanged.
+- Do not claim automatic CPU recovery from every GPU error: the bundled fallback handles model construction, not all later inference failures. On a runtime GPU failure, record the failure and use a tested explicit CPU module invocation or repair the local backend before retrying. The current CLI does not expose a `--device` option; do not invent one.
+
 ## Non-negotiable rules
 
 - Start from one explicitly specified sermon video. If more than one video or audio track is plausible, resolve it from context or stop; never guess.
