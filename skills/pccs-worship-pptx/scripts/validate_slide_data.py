@@ -10,6 +10,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
+from scripture_contract import validate_verse_metadata
 
 
 LYRIC_PUNCTUATION = re.compile(r"[，。！？；：、,.!?;:\"'“”‘’（）()《》【】\[\]—…]")
@@ -25,6 +26,18 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
     errors: list[str] = []
     if not isinstance(payload, dict):
         return ["Slide data must be a JSON object."], {}
+
+    typography = payload.get("typography", {})
+    if not isinstance(typography, dict):
+        errors.append("typography must be an object.")
+        typography = {}
+    lyric_pt = typography.get("lyric_font_pt", 40)
+    title_pt = typography.get("title_font_pt", 44)
+    for field, value in (("lyric_font_pt", lyric_pt), ("title_font_pt", title_pt)):
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 < value < float("inf"):
+            errors.append(f"typography.{field} must be a finite positive number.")
+    if (lyric_pt != 40 or title_pt != 44) and not str(typography.get("override_reason") or "").strip():
+        errors.append("typography.override_reason must record the explicit user size override.")
 
     songs = payload.get("songs")
     scriptures = payload.get("scriptures", [])
@@ -58,6 +71,11 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
         if not isinstance(title, str) or not title.strip():
             errors.append(f"{label}.title is required.")
         song_by_id[song_id] = song
+
+        if "credit_lines" in song:
+            credits = song["credit_lines"]
+            if not isinstance(credits, list) or not credits or any(not isinstance(line, str) or not line.strip() for line in credits):
+                errors.append(f"{label}.credit_lines must be a non-empty list of attribution text.")
 
         expanded = song.get("arrangement_expanded")
         if not isinstance(expanded, list) or not expanded:
@@ -93,6 +111,7 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
         if not isinstance(scripture, dict):
             errors.append(f"{label} must be an object.")
             continue
+        errors.extend(validate_verse_metadata(scripture, label))
         scripture_id = scripture.get("id")
         if not isinstance(scripture_id, str) or not scripture_id.strip():
             errors.append(f"{label}.id is required.")
@@ -129,6 +148,8 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
         scripture_id: [] for scripture_id in scripture_by_id
     }
     scripture_page_counts: Counter[str] = Counter()
+    scripture_page_positions: dict[str, list[int]] = {}
+    scripture_sizes: dict[str, set[tuple]] = {}
 
     for position, page in enumerate(pages, start=1):
         label = f"pages[{position}]"
@@ -137,6 +158,10 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             continue
 
         role = page.get("role")
+        if "credit_lines" in page:
+            credits = page["credit_lines"]
+            if not isinstance(credits, list) or not credits or any(not isinstance(line, str) or not line.strip() for line in credits):
+                errors.append(f"{label}.credit_lines must be a non-empty list of attribution text.")
         if role not in ALLOWED_ROLES:
             errors.append(f"{label}.role must be one of {sorted(ALLOWED_ROLES)}.")
         lines = page.get("lines")
@@ -145,22 +170,41 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             lines = []
         if role in SONG_ROLES and len(lines) > 3:
             errors.append(f"{label} must contain at most 3 lines.")
+        if role == "song_first" and len(lines) > 2 and lyric_pt == 40 and title_pt == 44:
+            errors.append(f"{label}: the default first-page grid fits at most 2 lyric lines in the upper half.")
 
         font = page.get("font")
-        if role in BODY_ROLES and font != "KaiTi":
+        if role in SONG_ROLES and font != "KaiTi":
             errors.append(f"{label}.font must be KaiTi.")
-        if role in SONG_ROLES and page.get("body_font_pt") != 48:
-            errors.append(f"{label}.body_font_pt must be exactly 48.")
+        if role in SONG_ROLES and page.get("body_font_pt") != lyric_pt:
+            errors.append(f"{label}.body_font_pt must be exactly {lyric_pt}.")
         if role == "scripture":
+            errors.extend(validate_verse_metadata(page, label))
+            override = page.get("style_override_reason")
+            has_override = isinstance(override, str) and bool(override.strip())
+            if override is not None and not has_override:
+                errors.append(f"{label}.style_override_reason must record an explicit user instruction.")
+            if not isinstance(font, str) or not font.strip():
+                errors.append(f"{label}.font must be non-empty text.")
+            elif font != "SimSun" and not has_override:
+                errors.append(f"{label}.font must be SimSun for formal scripture.")
+            alignment = page.get("alignment")
+            if alignment not in ("left", "center", "right", "justify"):
+                errors.append(f"{label}.alignment is invalid.")
+            if alignment != "left" and not has_override:
+                errors.append(f"{label}.alignment must be left for formal scripture.")
             body_font_pt = page.get("body_font_pt")
             if (
                 not isinstance(body_font_pt, (int, float))
                 or isinstance(body_font_pt, bool)
-                or body_font_pt <= 0
+                or not 0 < body_font_pt < float("inf")
+                or (body_font_pt > 36 and not has_override)
             ):
-                errors.append(f"{label}.body_font_pt must be a positive number.")
-        if role == "song_first" and page.get("title_font_pt") != 54:
-            errors.append(f"{label}.title_font_pt must be exactly 54.")
+                errors.append(f"{label}.body_font_pt must be a positive number at most 36.")
+            else:
+                scripture_sizes.setdefault(str(page.get("scripture_id")), set()).add((str(font), body_font_pt, str(alignment), str(page.get("body_shadow", False))))
+        if role == "song_first" and page.get("title_font_pt") != title_pt:
+            errors.append(f"{label}.title_font_pt must be exactly {title_pt}.")
 
         for line_number, raw_line in enumerate(lines, start=1):
             if not isinstance(raw_line, str) or not raw_line.strip():
@@ -184,6 +228,7 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
             else:
                 scripture_page_counts[scripture_id] += 1
                 scripture_page_lines[scripture_id].extend(lines)
+                scripture_page_positions.setdefault(scripture_id, []).append(position)
 
         if role in SONG_ROLES:
             song_id = page.get("song_id")
@@ -284,6 +329,27 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
         )
 
     actual_sequences: dict[str, list[str]] = {}
+    for scripture_id, sizes in scripture_sizes.items():
+        if len(sizes) > 1:
+            errors.append(f"Scripture {scripture_id!r} body font must be uniform across its pages.")
+
+    song_ids = list(song_by_id)
+    for scripture_id, source in scripture_by_id.items():
+        placement = source.get("position")
+        if placement is None:
+            continue
+        match = re.fullmatch(r"(before|after)_song_([1-9]\d*)", str(placement))
+        if not match or int(match[2]) > len(song_ids):
+            errors.append(f"Scripture {scripture_id!r}.position must name before_song_N or after_song_N in this song list.")
+            continue
+        anchor = song_ids[int(match[2]) - 1]
+        anchor_pages = [i for i, p in enumerate(pages, 1) if isinstance(p, dict) and p.get("role") in SONG_ROLES and p.get("song_id") == anchor]
+        reading_pages = scripture_page_positions.get(scripture_id, [])
+        if anchor_pages and reading_pages:
+            wrong = max(reading_pages) >= min(anchor_pages) if match[1] == "before" else min(reading_pages) <= max(anchor_pages)
+            if wrong:
+                errors.append(f"Scripture {scripture_id!r} page position does not match {placement}.")
+
     for song_id, entries in performance_pages.items():
         first_page_count = sum(1 for entry in entries if entry[3] == "song_first")
         if first_page_count != 1:

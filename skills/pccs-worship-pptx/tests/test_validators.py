@@ -94,8 +94,8 @@ def valid_slide_data() -> dict:
                 "title": "Song One",
                 "lines": ["Hallelujah", "There is glory here"],
                 "font": "KaiTi",
-                "title_font_pt": 54,
-                "body_font_pt": 48,
+                "title_font_pt": 44,
+                "body_font_pt": 40,
                 "song_id": "song-1",
                 "section_code": "V",
                 "performance_index": 1,
@@ -106,7 +106,7 @@ def valid_slide_data() -> dict:
                 "lines": ["Worship with all your heart", "Shout aloud"],
                 "font": "KaiTi",
                 "title_font_pt": 28,
-                "body_font_pt": 48,
+                "body_font_pt": 40,
                 "song_id": "song-1",
                 "section_code": "C",
                 "performance_index": 2,
@@ -117,7 +117,7 @@ def valid_slide_data() -> dict:
                 "lines": ["There is glory here"],
                 "font": "KaiTi",
                 "title_font_pt": 28,
-                "body_font_pt": 48,
+                "body_font_pt": 40,
                 "song_id": "song-1",
                 "section_code": "End",
                 "performance_index": 3,
@@ -128,7 +128,7 @@ def valid_slide_data() -> dict:
                 "lines": ["There is glory here"],
                 "font": "KaiTi",
                 "title_font_pt": 28,
-                "body_font_pt": 48,
+                "body_font_pt": 40,
                 "song_id": "song-1",
                 "section_code": "End",
                 "performance_index": 4,
@@ -166,7 +166,8 @@ def valid_slide_data_with_scripture() -> dict:
             "role": "scripture",
             "scripture_id": "scripture-1",
             "lines": list(source_lines),
-            "font": "KaiTi",
+            "font": "SimSun",
+            "alignment": "left",
             "body_font_pt": 30,
         },
     )
@@ -174,6 +175,22 @@ def valid_slide_data_with_scripture() -> dict:
 
 
 class ProjectValidatorTests(unittest.TestCase):
+    def test_rejects_empty_or_non_array_project_credits(self):
+        for value in ([], "Publisher", [""]):
+            payload = image_project()
+            payload["songs"][0]["credit_lines"] = value
+            result = run_validator(PROJECT_VALIDATOR, payload)
+            self.assertNotEqual(0, result.returncode)
+            self.assertIn("credit_lines", result.stderr)
+
+    def test_rejects_unreconstructable_scripture_number_metadata(self):
+        payload = project_with_scripture()
+        scripture = payload["scripture"][0]
+        scripture.update(raw_source_lines=["wrong", "source"], verse_prefixes=["1", ""], verse_numbers=["1", ""], translation="Provided edition", verse_boundaries_verified=True, verse_metadata_audit="Verified source")
+        result = run_validator(PROJECT_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("reconstruct", result.stderr)
+
     def test_accepts_image_source_with_explicit_arrangement(self):
         result = run_validator(PROJECT_VALIDATOR, image_project())
         self.assertEqual(0, result.returncode, result.stderr)
@@ -298,6 +315,61 @@ class ProjectValidatorTests(unittest.TestCase):
 
 
 class SlideDataValidatorTests(unittest.TestCase):
+    def test_default_first_song_page_has_room_for_only_two_lines(self):
+        payload = valid_slide_data()
+        payload["pages"][0]["lines"] = ["First line", "Second line", "Third line"]
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("first-page", result.stderr)
+
+    def test_accepts_an_explicit_service_style_override_in_a_mixed_deck(self):
+        payload = valid_slide_data_with_scripture()
+        payload["pages"][0].update(font="SimHei", body_font_pt=32, style_override_reason="User explicitly requested SimHei scripture")
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_rejects_scripture_after_songs_when_before_song_is_requested(self):
+        payload = valid_slide_data_with_scripture()
+        payload["scriptures"][0]["position"] = "before_song_1"
+        payload["pages"].append(payload["pages"].pop(0))
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("position", result.stderr)
+
+    def test_rejects_unverified_verse_metadata_in_slide_plan(self):
+        payload = valid_slide_data_with_scripture()
+        source = payload["scriptures"][0]
+        source["raw_source_lines"] = source["source_lines"]
+        source["verse_prefixes"] = [""] * len(source["source_lines"])
+        source["verse_numbers"] = [""] * len(source["source_lines"])
+        source["verse_boundaries_verified"] = False
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("verse_boundaries_verified", result.stderr)
+
+    def test_rejects_empty_declared_song_credits(self):
+        payload = valid_slide_data()
+        payload["songs"][0]["credit_lines"] = [" "]
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("credit_lines", result.stderr)
+
+    def test_accepts_explicit_lyric_size_override_without_editing_validator(self):
+        payload = valid_slide_data()
+        payload["typography"] = {"lyric_font_pt": 42, "title_font_pt": 46, "override_reason": "User requested 42pt lyrics and 46pt titles"}
+        for page in payload["pages"]:
+            page["body_font_pt"] = 42
+        payload["pages"][0]["title_font_pt"] = 46
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_rejects_unexplained_lyric_size_override(self):
+        payload = valid_slide_data()
+        payload["typography"] = {"lyric_font_pt": 42}
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("override_reason", result.stderr)
+
     def test_accepts_fully_expanded_valid_slide_data(self):
         result = run_validator(SLIDE_VALIDATOR, valid_slide_data())
         self.assertEqual(0, result.returncode, result.stderr)
@@ -310,12 +382,12 @@ class SlideDataValidatorTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("at most 3 lines", result.stderr.lower())
 
-    def test_rejects_body_font_below_48pt(self):
+    def test_rejects_old_lyric_size(self):
         payload = valid_slide_data()
-        payload["pages"][0]["body_font_pt"] = 47
+        payload["pages"][0]["body_font_pt"] = 48
         result = run_validator(SLIDE_VALIDATOR, payload)
         self.assertNotEqual(0, result.returncode)
-        self.assertIn("48", result.stderr)
+        self.assertIn("40", result.stderr)
 
     def test_rejects_lyric_punctuation(self):
         payload = valid_slide_data()
@@ -447,6 +519,32 @@ class SlideDataValidatorTests(unittest.TestCase):
         summary = json.loads(result.stdout)
         self.assertEqual(1, summary["scripture_count"])
         self.assertEqual(9, summary["scripture_source_lines"])
+
+    def test_rejects_scripture_above_36pt(self):
+        payload = valid_slide_data_with_scripture()
+        payload["pages"][0]["body_font_pt"] = 40
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("36", result.stderr)
+
+    def test_rejects_centered_scripture(self):
+        payload = valid_slide_data_with_scripture()
+        payload["pages"][0]["alignment"] = "center"
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("left", result.stderr)
+
+    def test_rejects_font_changes_within_one_passage(self):
+        payload = valid_slide_data_with_scripture()
+        payload["scriptures"][0]["single_slide"] = False
+        first = payload["pages"][0]
+        second = copy.deepcopy(first)
+        first["lines"], second["lines"] = first["lines"][:4], first["lines"][4:]
+        second["body_font_pt"] = 36
+        payload["pages"].insert(1, second)
+        result = run_validator(SLIDE_VALIDATOR, payload)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("uniform", result.stderr)
 
     def test_rejects_scripture_lines_merged_from_txt_source(self):
         payload = valid_slide_data_with_scripture()

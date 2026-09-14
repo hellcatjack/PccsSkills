@@ -10,6 +10,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 from typing import Any
+from scripture_contract import validate_verse_metadata
 
 
 ALLOWED_SOURCE_MODES = {"auto", "images", "youtube", "youtube_search"}
@@ -97,6 +98,11 @@ def validate(payload: Any) -> tuple[list[str], list[str], dict[str, Any]]:
         if not isinstance(title, str) or not title.strip():
             errors.append(f"{label}.title is required.")
 
+        if "credit_lines" in song:
+            credits = song["credit_lines"]
+            if not isinstance(credits, list) or not credits or any(not isinstance(line, str) or not line.strip() for line in credits):
+                errors.append(f"{label}.credit_lines must be a non-empty list of attribution text.")
+
         mode = song.get("source_mode", "auto")
         if mode not in ALLOWED_SOURCE_MODES:
             errors.append(
@@ -163,6 +169,7 @@ def validate(payload: Any) -> tuple[list[str], list[str], dict[str, Any]]:
         if not isinstance(scripture, dict):
             errors.append(f"{label} must be an object.")
             continue
+        errors.extend(validate_verse_metadata(scripture, label))
 
         scripture_id = scripture.get("id")
         if not isinstance(scripture_id, str) or not scripture_id.strip():

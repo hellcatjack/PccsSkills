@@ -2,10 +2,12 @@ param(
     [Parameter(Mandatory = $true)][string]$Deck,
     [string]$QaCopy = '',
     [string]$RenderDir = '',
-    [string]$BackgroundNamePattern = 'PCCS service background 48x23*'
+    [string]$BackgroundNamePattern = 'PCCS service background 48x23*',
+    [string]$ProjectJson = ''
 )
 
 $ErrorActionPreference = 'Stop'
+. (Join-Path $PSScriptRoot 'qa_pccs_service_helpers.ps1')
 
 function Release-ComObject {
     param($Object)
@@ -31,36 +33,41 @@ if (-not (Test-Path -LiteralPath $Deck)) {
 }
 
 $deckItem = Get-Item -LiteralPath $Deck
+$runId = [Guid]::NewGuid().ToString('N')
 if ([string]::IsNullOrWhiteSpace($QaCopy)) {
-    $QaCopy = Join-Path $deckItem.DirectoryName ($deckItem.BaseName + '_qa-duplicate.pptx')
+    $QaCopy = Join-Path $deckItem.DirectoryName ($deckItem.BaseName + '_qa-' + $runId + '.pptx')
 }
 if ([string]::IsNullOrWhiteSpace($RenderDir)) {
-    $RenderDir = Join-Path $deckItem.DirectoryName ($deckItem.BaseName + '_qa-render')
+    $RenderDir = Join-Path $deckItem.DirectoryName ($deckItem.BaseName + '_qa-render-' + $runId)
 }
+Assert-PccsNewOutputPath $deckItem.FullName $QaCopy
+Assert-PccsNewOutputPath $deckItem.FullName $RenderDir
+$QaCopy = [IO.Path]::GetFullPath($QaCopy)
+$RenderDir = [IO.Path]::GetFullPath($RenderDir)
+$projectPlan = if ($ProjectJson) { Get-Content -LiteralPath $ProjectJson -Raw -Encoding UTF8 | ConvertFrom-Json } else { $null }
+# Open only our own new copy. Even read-only opening the user's existing deck can
+# attach to a window the user already has open.
+[IO.File]::Copy($deckItem.FullName, $QaCopy, $false)
 
 $app = $null
 $presentation = $null
 
 try {
     $app = New-Object -ComObject PowerPoint.Application
-    $presentation = $app.Presentations.Open($Deck, $true, $false, $false)
+    $presentation = $app.Presentations.Open($QaCopy, $false, $false, $false)
 
     Assert-Near $presentation.PageSetup.SlideWidth 720 'Slide width'
     Assert-Near $presentation.PageSetup.SlideHeight 405 'Slide height'
 
-    $layoutNames = New-Object 'System.Collections.Generic.HashSet[string]'
-    $matchingNames = New-Object 'System.Collections.Generic.HashSet[string]'
-    $layoutFirstSlides = @{}
+    $layouts = @{}
+    $serviceMap = if ($projectPlan) { Get-PccsServiceSlideMap $projectPlan $presentation.Slides.Count } else { @{} }
+    $consumedServiceSlides = New-Object 'System.Collections.Generic.HashSet[int]'
+    $scriptureBodyChecks = 0
     $emptySlidePlaceholders = 0
     $boundsProblems = @()
 
     foreach ($slide in $presentation.Slides) {
-        $layout = $slide.CustomLayout
-        [void]$layoutNames.Add($layout.Name)
-        [void]$matchingNames.Add($layout.MatchingName)
-        if (-not $layoutFirstSlides.ContainsKey($layout.Name)) {
-            $layoutFirstSlides[$layout.Name] = $slide.SlideIndex
-        }
+        Register-PccsLayout $layouts $slide
 
         foreach ($shape in $slide.Shapes) {
             if ($shape.Type -eq 14) {
@@ -75,11 +82,17 @@ try {
                 $boundsProblems += "Slide $($slide.SlideIndex): $($shape.Name)"
             }
         }
+        if ($serviceMap.ContainsKey([int]$slide.SlideIndex)) {
+            $planned = $serviceMap[[int]$slide.SlideIndex]
+            if ($planned.type -eq 'scripture') {
+                Assert-PccsScriptureBody $slide $planned
+                $scriptureBodyChecks++
+            }
+            [void]$consumedServiceSlides.Add([int]$slide.SlideIndex)
+        }
     }
+    Assert-PccsConsumedServiceSlides $serviceMap $consumedServiceSlides
 
-    if ($layoutNames.Count -ne $matchingNames.Count) {
-        throw "Layout Name/MatchingName identities are not unique."
-    }
     if ($emptySlidePlaceholders -ne 0) {
         throw "Found $emptySlidePlaceholders empty slide placeholders."
     }
@@ -87,15 +100,9 @@ try {
         throw ($boundsProblems -join '; ')
     }
 
-    foreach ($layoutName in $layoutNames) {
-        $layout = $null
-        foreach ($candidate in $presentation.Designs.Item(1).SlideMaster.CustomLayouts) {
-            if ($candidate.Name -eq $layoutName) {
-                $layout = $candidate
-                break
-            }
-        }
-        if ($null -eq $layout) { throw "Missing used layout: $layoutName" }
+    foreach ($entry in $layouts.Values) {
+        $layout = $entry.Layout
+        $layoutName = $layout.Name
 
         $backgrounds = @()
         $tips = @()
@@ -103,7 +110,11 @@ try {
         foreach ($shape in $layout.Shapes) {
             if ($shape.Name -like $BackgroundNamePattern) { $backgrounds += $shape }
             if ($shape.Name -eq 'PCCS logo tip overlay') { $tips += $shape }
-            if ($shape.Type -eq 14) { $placeholderCount++ }
+            if ($shape.Type -eq 14) {
+                $placeholderText = ''
+                try { $placeholderText = $shape.TextFrame.TextRange.Text.Trim() } catch {}
+                if ($placeholderText.Length -eq 0) { $placeholderCount++ }
+            }
         }
 
         if ($backgrounds.Count -ne 1) {
@@ -134,34 +145,17 @@ try {
     }
 
     $slideCount = $presentation.Slides.Count
-    $presentation.Close()
-    Release-ComObject $presentation
-    $presentation = $null
-
-    Copy-Item -LiteralPath $Deck -Destination $QaCopy -Force
-    $presentation = $app.Presentations.Open($QaCopy, $false, $false, $false)
-    $targets = @($layoutFirstSlides.Values | Sort-Object -Descending)
+    $targets = @($layouts.Values | ForEach-Object { $_.SourceSlide } | Sort-Object -Descending)
+    $expectedDuplicates = @{}
     foreach ($target in $targets) {
         $duplicate = $presentation.Slides.Item([int]$target).Duplicate().Item(1)
         $duplicate.Name = "QA duplicate source $target"
 
-        $edited = $false
-        foreach ($shape in $duplicate.Shapes) {
-            try {
-                if ($shape.HasTextFrame -and $shape.TextFrame.HasText) {
-                    $shape.TextFrame.TextRange.Text += ' '
-                    $edited = $true
-                    break
-                }
-            }
-            catch {}
-        }
-        if (-not $edited) {
-            $marker = $duplicate.Shapes.AddTextbox(1, 0, 0, 1, 1)
-            $marker.Name = 'QA edit marker'
-            $marker.TextFrame.TextRange.Text = 'QA'
-            $marker.Visible = 0
-        }
+        $before = Get-PccsSlideTextState $duplicate
+        Set-PccsVisibleQaEdit $duplicate
+        $after = Get-PccsSlideTextState $duplicate
+        if ($before -cne $after) { throw "QA visible edit changed typography or layout: source $target" }
+        $expectedDuplicates[$duplicate.Name] = Get-PccsSlideTextState $duplicate -IncludeText
         Release-ComObject $duplicate
     }
 
@@ -187,29 +181,40 @@ try {
         if ($backgroundCount -ne 1 -or $tipCount -ne 1) {
             throw "Duplicate '$($slide.Name)' lost its background or PCCS logo tip overlay."
         }
+        $actualState = Get-PccsSlideTextState $slide -IncludeText
+        if ($actualState -cne $expectedDuplicates[$slide.Name]) {
+            throw "Duplicate '$($slide.Name)' changed visible text, fonts, geometry or layout after reopen."
+        }
 
         $slide.Export((Join-Path $duplicateRenderDir ($slide.Name + '.png')), 'PNG', 1600, 900)
     }
 
-    if ($duplicatesFound -ne $layoutNames.Count) {
-        throw "Expected $($layoutNames.Count) duplicate layouts, found $duplicatesFound."
+    if ($duplicatesFound -ne $layouts.Count) {
+        throw "Expected $($layouts.Count) duplicate layouts, found $duplicatesFound."
     }
 
     [pscustomobject]@{
         Slides = $slideCount
-        UniqueLayouts = $layoutNames.Count
-        UniqueMatchingNames = $matchingNames.Count
+        UniqueLayouts = $layouts.Count
+        UniqueMatchingNames = $layouts.Count
         BackgroundGeometry = 'PASS (0,0,720,345)'
         EmptySlidePlaceholders = $emptySlidePlaceholders
         ShapeBounds = 'PASS'
         FinalRenders = $slideCount
         DuplicateEditSaveReopen = "PASS ($duplicatesFound layouts)"
         DuplicateRenders = $duplicatesFound
+        ScriptureBodyChecks = $(if ($projectPlan) { "PASS ($scriptureBodyChecks declared scripture bodies)" } else { 'Not requested: supply -ProjectJson' })
+        ServiceMappedSlides = $consumedServiceSlides.Count
+        QaCopy = $QaCopy
     }
 }
 finally {
-    if ($presentation) { try { $presentation.Close() } catch {} }
-    if ($app) { try { $app.Quit() } catch {} }
+    if ($presentation) {
+        # On failure, discard unsaved edits in our QA copy without a save prompt.
+        try { $presentation.Saved = -1; $presentation.Close() } catch {}
+    }
+    # PowerPoint may share one application across automation and user windows.
+    # Close only the presentation opened above; never quit the application.
     Release-ComObject $presentation
     Release-ComObject $app
     [GC]::Collect()

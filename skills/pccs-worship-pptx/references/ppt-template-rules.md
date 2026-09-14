@@ -34,28 +34,34 @@ For a refined, themed, or content-adapted deck, apply `visual-style.md` in addit
 
 ## Typography
 
-- Set every editable Chinese run to `KaiTi` in both `Name` and `NameFarEast`.
-- First page of each song: centered song title at exactly `54pt`.
-- Lyric body: exactly `48pt`.
-- Scripture body: default `48pt`. If the user explicitly requires one scripture slide, or one intact source line cannot fit at `48pt`, choose the largest fitting scripture size and record the exception. This exception never changes lyric sizing.
-- Continuation-page song-name size, weight, and position come from the template unless the user supplies a newer rule.
+- Set song text to `KaiTi` in both `Name` and `NameFarEast`. Formal scripture uses `SimSun`; its heading uses `Microsoft YaHei`.
+- First page of each song: centered song title at exactly `44pt`.
+- Lyric body: exactly `40pt`.
+- Scripture body: default and maximum `36pt`, left aligned, uniform within a passage, with no text shadow. Use the formal scripture grid in `pccs-service-pptx`. Prefer pagination at complete source lines; an explicitly required single page may use a documented smaller uniform size, never automatic shrinking.
+- Continuation song name: right aligned `22pt` in the purple bar. Author/copyright text: right aligned `9pt` in that bar. Exact geometry is in `visual-style.md`.
 - Do not switch lyric body sizes between slides.
 - Never use automatic font shrinking. Select scripture exceptions explicitly and verify them by rendering.
-- Do not trust slide-plan declarations or inherited template styles as proof of lyric sizing. Inspect the actual rendered runs in the final PPTX: every non-empty lyric run must resolve to `KaiTi` at exactly `48pt`. An inherited `44pt` run is a failure even when `body_font_pt` says `48`.
+- Do not trust slide-plan declarations or inherited template styles as proof of lyric sizing. Inspect the actual rendered runs in the final PPTX: every non-empty lyric run must resolve to `KaiTi` at exactly `40pt`. An inherited `44pt` or `48pt` lyric run fails this profile even when `body_font_pt` says `40`.
 - Preserve template text colors in template-faithful mode. In refined mode, use the element-specific fills and text shadows from `visual-style.md`; apply text shadow to the font, not to the text-box shape.
 
 ## Content Layout
 
-- Put lyric/scripture content in the upper safe area so heads in the front rows do not block it.
+- Put lyrics in the upper half of the full slide (`y<=202.5pt`), with a balanced title/body relationship. Scripture can use the upper-middle area to preserve complete readable paragraphs.
 - Use at most three lyric lines per slide. This limit does not apply to an explicitly requested scripture slide.
 - Keep each logical line as one paragraph and disable unwanted automatic wrapping.
 - Remove lyric punctuation; retain single spaces between lyric phrases.
-- When a score or lyric image is available, treat complete musical phrases, breath points, rests, and cadences as the primary pagination boundaries. Prefer two lyric lines per slide when that follows the musical phrase and improves breathing; use three only when the phrase structure still reads naturally and every actual rendered run remains `48pt`. One-line pages are allowed for a meaningful ending or when combining would harm legibility.
+- When a score or lyric image is available, treat complete musical phrases, breath points, rests, and cadences as the primary pagination boundaries. Prefer two lyric lines per slide when that follows the musical phrase and improves breathing; use three only when the phrase structure still reads naturally and every actual rendered run remains `40pt`. One-line pages are allowed for a meaningful ending or when combining would harm legibility.
 - Keep repeated instances of the same section on the same phrase-based pagination unless the verified performance changes the phrasing.
-- If a 48pt line does not fit, split at a semantic phrase boundary. Do not reduce the font.
+- If a 40pt line does not fit, split at a semantic phrase boundary. Do not reduce the font.
 - Song title, lyric body, logo, and church identity must not overlap or leave their intended bounds.
 
-For scripture, every canonical `source_lines` item must become exactly one PowerPoint paragraph. Do not merge, split, reorder, paraphrase, or silently re-punctuate source lines. Disable automatic wrapping; pagination may occur only between complete source lines. If `single_slide: true`, place all source lines on that one slide and fit them by adjusting scripture-specific geometry and then the scripture font size, never by changing the lines.
+For fixed-line scripture, every canonical `source_lines` item becomes exactly one PowerPoint paragraph. Do not merge, split, reorder, paraphrase, or silently re-punctuate it. The mixed-deck validator checks this fixed-line contract. Continuous scripture supplied without fixed breaks belongs to the service skill's paragraph/wrapping workflow. If `single_slide: true`, adjust scripture geometry and choose a smaller uniform size at or below `36pt`; report a genuine capacity conflict instead of silently abandoning legibility.
+
+Keep raw scripture input separately when normalizing verse markers. Verify chapter/verse boundaries against the selected edition, record the source and every correction, and move verified numbers to editable gutter text without changing the passage wording. The canonical body and marker mapping must reconstruct the source.
+
+## Import and Export Preservation
+
+Inspect the exported package and a native PowerPoint render before accepting a library round trip. If custom-layout images or identity elements disappear, repair the template relationships or transplant only the intended editable text/geometry changes into a preserved template copy. Do not rebuild unrelated slides. Re-run native rendering and duplication checks on the repaired candidate.
 
 ## Slide Sequence
 

@@ -16,6 +16,8 @@ Lower-priority evidence may repair missing or obviously wrong characters, but ev
 
 Create canonical sections such as `V`, `V1`, `V2`, `C`, `C1`, `C2`, `B`, and `End`. Preserve meaningful phrase boundaries and spaces. Resolve repeat signs, first/second endings, and cross-line carry-over words before expanding the performance order.
 
+If the source has V1 and V2 but the brief says `V C / V C`, do not assume both Vs mean V1. Resolve the verse sequence from the user's existing answer or ask one material clarification. Keep that decision with the arrangement so later revisions do not reopen it.
+
 Example of a carry-over error: two characters printed near the end of C1 may fill the beginning of C2. Assign them by complete sentence meaning and repeat structure, not nearest OCR coordinates.
 
 ## Expand the Arrangement
@@ -57,7 +59,7 @@ Performance annotations such as `跳音`, `轻唱`, `渐强`, or `男女轮唱` 
 
 Scripture supplied explicitly in a TXT or guide file is not processed like lyrics. Capture the source as ordered `source_lines` before pagination. Keep every source line intact and in the same position; do not merge short lines, split long lines, reorder phrases, or remove punctuation for visual balance.
 
-Explicit project-wide character policies may be applied within a line, but they must be audited and must not change line boundaries. Carry the canonical `source_lines` unchanged into the slide plan. If multiple scripture pages are allowed, split only between array items. If `single_slide: true`, keep every item on one slide and solve fit through scripture-specific layout or font sizing.
+Only scripture-specific authorized corrections may change characters; audit them and preserve raw input. Carry canonical `source_lines` unchanged into the slide plan. If multiple pages are allowed, split between array items. Use the formal left-aligned service layout with a uniform body size at most `36pt`; if `single_slide: true`, solve fit within that ceiling without changing words or fixed lines.
 
 ## Create `lyrics_audit.md`
 
@@ -71,6 +73,8 @@ This file must exist before `complete_lyrics.md` or PPT generation. For each son
 - Baseline source:
 - Reference recording and match confidence:
 - Sources actually accessed:
+- Author/copyright `credit_lines`:
+- Permission/license source and required attribution:
 
 | Location | Baseline | Evidence | Final | Reason | Status |
 |---|---|---|---|---|---|

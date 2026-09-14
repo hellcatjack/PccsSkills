@@ -8,13 +8,13 @@ Resolve the exact lyric text and one concrete reference performance for each son
 
 When the user explicitly includes scripture in a TXT or guide file, that file is the authoritative source for scripture wording and line sequence. Capture the passage as an ordered line array before layout work. Do not use web copies, OCR, ASR, or remembered Bible formatting to merge, split, reorder, paraphrase, or re-punctuate those lines.
 
-If a global rule explicitly requires simplified Chinese or divine-pronoun normalization, apply it within each original line, record the character changes in the audit, and keep the original line count, order, and boundaries.
+Apply only scripture-specific authorized character corrections and record each change. Song normalization rules do not change scripture quotations. If standardizing verse labels, check boundaries against the selected Bible edition, keep the raw source, and record the corrected metadata separately.
 
 ## With Lyric Images
 
 1. Inspect every image directly with the model's visual ability; do not require OCR software as the first step.
 2. Identify title, lyric text, section labels, repeat signs, first/second endings, and cross-line carry-over words.
-3. Ignore chords, numbered notation, key, tempo, copyright lines, and non-lyric headers/footers.
+3. Exclude chords, numbered notation, key, tempo, and non-lyric headers/footers from lyric text. Capture author/copyright lines separately as `credit_lines`; never discard them with the notation.
 4. Treat image lyrics as the baseline.
 5. Use a matched YouTube recording, official lyrics, subtitles, audio, or ASR to detect missing or wrong characters.
 
@@ -50,6 +50,12 @@ Use the strongest available evidence in this order:
 5. ASR output, preferably full-file transcription when supported.
 
 YouTube access may fail or expose no captions. State exactly what was accessed. Do not claim to have heard audio or read subtitles unless the tool output proves it.
+
+## Official Lyrics and Attribution
+
+When asked to collect lyrics, actively search the matching publisher/ministry's lyric page, downloadable score, official PPT, and recording description. Use the accessible official material for transcription and compare the exact song/version before accepting it. A failed playlist link does not prevent checking official sources for the named songs.
+
+Retain songwriter, publisher, year, license identifier, and required attribution as source metadata. Record actual permission terms or license evidence when reproducing complete publisher materials; nonprofit worship use by itself is not a blanket permission record. Where the source grants the requested use, continue with the required attribution without asking again for already authorized work. If permission or access prevents complete reproduction, state the concrete limitation and continue the unaffected source audit and layout work.
 
 ## ASR Use
 

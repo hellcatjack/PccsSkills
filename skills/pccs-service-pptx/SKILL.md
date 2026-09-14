@@ -26,15 +26,15 @@ Use the **Presentations** skill for every PPTX inspection, edit, render, and ver
 
 1. Select the template. A non-empty user-supplied PPTX wins; otherwise use [assets/pccsworship.pptx](assets/pccsworship.pptx). Copy it into the project before editing.
 2. Normalize the request to the schema in `references/input-contract.md` and run `scripts/validate_project.py PROJECT.json`.
-3. Preserve all supplied text. Treat scripture `source_lines` and explicitly fixed line breaks as canonical; do not paraphrase, modernize pronouns, repunctuate, merge, split, or reorder them.
+3. Preserve all supplied text. Treat scripture `source_lines` and explicitly fixed line breaks as canonical; do not paraphrase, modernize pronouns, repunctuate, merge, split, or reorder them. For formal scripture, use the reading profile in `references/visual-style.md`: left-aligned `SimSun` body, normally `36pt` and never larger under this profile, with one body size throughout the passage. Prefer two or three rendered lines, at most four on the default grid, to clear the protruding logo tip. Verified verse numbers may become separate metadata only with exact `raw_source_lines` reconstruction and an audit.
 4. Inspect every source/template slide, master, layout, placeholder, footer, PCCS logo, church name, and protruding cross tip before editing.
 5. Choose one content-appropriate visual direction per page or reusable page group. Give the first slide the highest visual scrutiny, then carry its palette and alignment logic through the deck without repeating one dominant dark-purple block everywhere. Keep all pages in the same ivory, pearl white, pale lavender, muted gold, and limestone-gray family; use editable emphasis shapes for important cover, church-name, and vision text.
-6. Generate each custom background natively at `1920x920` (`48:23`). Place it at exactly `0,0,720,345` points. Never use a 16:9 background shifted to `y=-60`, and never bake the purple footer into the image.
+6. Target native `1920x920` (`48:23`) backgrounds. If a tool returns a nearby size, record measured pixels and accept only a relative aspect-ratio error of at most `0.1%`; place the complete image at exactly `0,0,720,345` points without cropping. Regenerate larger deviations. Never use a 16:9 background shifted to `y=-60`, and never bake the purple footer into the image.
 7. Keep the lyric/content region quiet and reserve the logo-safe area defined in `references/visual-style.md`. Restore the exact template pixels as a transparent `PCCS logo tip overlay` on the custom layout.
 8. Give every distinct custom layout a unique `Name` and unique `MatchingName`. Put the background and logo-tip overlay on the layout; keep titles, body text, scripture, and captions as editable slide text.
 9. Use authentic uploaded QR codes, forms, photos, and church assets. Do not regenerate, redraw, or approximate them.
 10. Remove unused PowerPoint placeholders, including `Click to add title`, `Click to add subtitle`, empty footer/date fields, and unused page-number placeholders.
-11. Render every slide at full size. Run `scripts/qa_pccs_service_pptx.ps1` when Microsoft PowerPoint is available, and perform the 复制/edit/save/reopen test for every distinct custom layout.
+11. Render every slide at full size. Run `scripts/qa_pccs_service_pptx.ps1` when Microsoft PowerPoint is available, and perform the 复制/edit/save/reopen test for every distinct custom layout. The script opens only a newly created QA copy, replaces a visible character, and checks preserved text styles and layout after reopening; it must never close a user's existing presentation or quit the shared PowerPoint application. Supply `-ProjectJson PROJECT.json` for actual scripture-body text, font, size, shadow, and alignment checks.
 
 ## Hard Gates
 
@@ -42,12 +42,13 @@ Use the **Presentations** skill for every PPTX inspection, edit, render, and ver
 - User wording is authoritative. Do not silently improve, shorten, translate, simplify, or correct it.
 - Scripture characters and canonical line order must remain exact.
 - The usable background area is `720x345pt`, not the full `720x405pt` slide.
-- Background assets must be `1920x920` and natively composed for `48:23`.
+- Background assets target `1920x920`, natively composed for `48:23`; measured near-ratio tool output follows the documented `0.1%` tolerance and full-image placement.
 - A generated background may not obscure the PCCS logo, cross tip, church name, QR code, form, or photos.
 - Essential text must remain visible above front-row sightlines; do not place the only title, instruction, reference, or call to action near the footer when the content fits higher.
 - Every distinct layout must have a unique `Name` and `MatchingName`.
 - Do not deliver with empty title/subtitle placeholders or default prompts such as `Click to add title` and `Click to add subtitle`.
 - Do not claim the PowerPoint duplication test passed unless the copied pages were edited, saved, closed, and reopened successfully.
+- Explicit user typography or a deliberately selected template style overrides the reading-profile defaults; record that decision, then validate against the effective profile. Do not infer a scripture font from the lyric font rule.
 
 ## Deliverables
 

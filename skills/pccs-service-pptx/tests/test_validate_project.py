@@ -1,4 +1,5 @@
 import json
+import copy
 import subprocess
 import sys
 import tempfile
@@ -99,6 +100,103 @@ class ValidateProjectTests(unittest.TestCase):
         result = self.run_validator(project)
         self.assertNotEqual(0, result.returncode)
         self.assertIn("consecutive", result.stderr)
+
+    def test_scripture_accepts_explicit_left_aligned_simsun_36(self):
+        project = valid_project()
+        project["slides"][1].update(body_font="SimSun", body_font_pt=36, alignment="left", body_shadow=False)
+        result = self.run_validator(project)
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_scripture_rejects_oversize_centered_or_shadowed_body(self):
+        for field, value in [("body_font_pt", 48), ("alignment", "center"), ("body_shadow", True)]:
+            with self.subTest(field=field):
+                project = valid_project()
+                project["slides"][1][field] = value
+                result = self.run_validator(project)
+                self.assertNotEqual(0, result.returncode, f"Accepted {field}={value}")
+                self.assertIn(field, result.stderr)
+
+    def test_scripture_explicit_user_style_override_is_recorded(self):
+        project = valid_project()
+        project["slides"][1].update(body_font="KaiTi", alignment="center", style_override_reason="User explicitly requested this template style.")
+        result = self.run_validator(project)
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_scripture_rejects_mixed_sizes_within_one_passage(self):
+        project = valid_project()
+        project["slides"][1].update(scripture_id="reading-1", body_font_pt=36, single_slide=False)
+        continuation = copy.deepcopy(project["slides"][1])
+        continuation.update(index=4, body_font_pt=32)
+        project["slides"].append(continuation)
+        result = self.run_validator(project)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("uniform", result.stderr)
+
+    def test_scripture_accepts_audited_verse_metadata_with_exact_raw_text(self):
+        project = valid_project()
+        project["slides"][1].update(
+            source_lines=["普天下当向耶和华欢呼。", "你们当乐意侍奉耶和华。"],
+            raw_source_lines=["1　普天下当向耶和华欢呼。", "2　你们当乐意侍奉耶和华。"],
+            verse_numbers=["1", "2"], verse_prefixes=["1　", "2　"],
+            verse_metadata_audit="Checked verse boundaries against the supplied edition.",
+            translation="User-supplied edition", verse_boundaries_verified=True,
+        )
+        result = self.run_validator(project)
+        self.assertEqual(0, result.returncode, result.stderr)
+        project["slides"][1]["source_lines"][0] = "普天下当向耶和华欢呼！"
+        result = self.run_validator(project)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("raw_source_lines", result.stderr)
+
+    def test_scripture_verse_metadata_requires_audit_and_boundary_verification(self):
+        project = valid_project()
+        project["slides"][1]["verse_numbers"] = ["1", "2"]
+        result = self.run_validator(project)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("raw_source_lines", result.stderr)
+
+    def test_non_fixed_source_lines_allow_visual_wrapping(self):
+        project = valid_project()
+        project["slides"][1].update(source_lines_fixed=False, allow_visual_wrap=True)
+        result = self.run_validator(project)
+        self.assertEqual(0, result.returncode, result.stderr)
+        project["slides"][1]["source_lines_fixed"] = True
+        result = self.run_validator(project)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("allow_visual_wrap", result.stderr)
+
+    def test_accepts_measured_near_ratio_background_without_cropping(self):
+        project = valid_project()
+        project["project"].update(background_size_pixels="1920x920", background_actual_size_pixels=[2048, 981], background_size_audit="Measured output; placed complete at 0,0,720,345.")
+        result = self.run_validator(project)
+        self.assertEqual(0, result.returncode, result.stderr)
+        project["project"]["background_actual_size_pixels"] = [1920, 1080]
+        result = self.run_validator(project)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ratio", result.stderr)
+
+    def test_measured_non_target_background_requires_audit(self):
+        project = valid_project()
+        project["project"]["background_actual_size_pixels"] = [2048, 981]
+        result = self.run_validator(project)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("background_size_audit", result.stderr)
+
+    def test_service_pages_can_map_to_nonconsecutive_mixed_deck_positions(self):
+        project = valid_project()
+        for slide, final_index in zip(project["slides"], [2, 17, 42]):
+            slide["final_slide_index"] = final_index
+        result = self.run_validator(project)
+        self.assertEqual(0, result.returncode, result.stderr)
+
+    def test_mixed_deck_mapping_rejects_duplicate_and_noninteger_final_indexes(self):
+        for invalid_index in [2, 0, -1, True, 2.5, "17"]:
+            with self.subTest(final_slide_index=invalid_index):
+                project = valid_project()
+                project["slides"][0]["final_slide_index"] = invalid_index
+                result = self.run_validator(project)
+                self.assertNotEqual(0, result.returncode)
+                self.assertIn("final_slide_index", result.stderr)
 
 
 if __name__ == "__main__":
