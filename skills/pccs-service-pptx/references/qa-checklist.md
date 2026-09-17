@@ -1,65 +1,28 @@
 # QA Checklist
 
-Delivery is blocked until all applicable checks pass.
+## Scope and content
 
-## Content
+- Use the latest effective template and record its hash, size and profile. User-supplied files win.
+- For background-only revisions keep source page count/order, text, punctuation, fixed line breaks, typography, layout IDs and all foreground/Logo/cloud content. Compare package parts and record only intentional background-media changes.
+- For new lyrics verify accepted audit, expanded performance order, phrase-based pagination, at most three lines, exact source_lines for scripture, and actual editable runs. A source-preserving background edit does not require new lyric research.
+- New wide-v3 plans explicitly select the profile. Lyrics are52pt KaiTi, title40pt KaiTi; legacy48pt/54pt remains scoped to its template. Check typography overrides against their source, not declarations alone. Set NameFarEast and Name per role; preserve separate church-name and scripture fonts.
 
-- [ ] Slide count and order match the approved input.
-- [ ] User-supplied text is character-for-character preserved unless an explicit edit was approved.
-- [ ] Scripture `source_lines` retain exact characters, punctuation, order, and fixed line boundaries.
-- [ ] Scripture translation and verse boundaries are verified; separated verse numbers have `raw_source_lines`, exact prefixes and a reconstruction audit. Full-width spaces survive exactly.
-- [ ] Dates, names, email addresses, phone numbers, prices, and account information are unchanged.
-- [ ] QR codes, forms, and photos are authentic uploaded assets.
+## Visual checks
 
-## Visual
+- Render every affected slide individually at full size. Identical repeated renders may share visual review only after exact pixel equivalence is verified.
+- The first slide receives highest visual scrutiny; carry the alignment and content hierarchy across the deck. Use editable emphasis shapes when they serve meaning, not a dominant dark-purple block on every page.
+- Current background geometry is0,0,960,540pt and native16:9. Upper reading space stays pale and quiet; right-middle scenery clears longest lines. Lower quarter retains low-saturation gray-purple natural texture. No painted solid purple bottom, hard seam or additional subtitle mist.
+- Keep main text in the upper half/upper middle for front-row sightlines; two-line first pages top-align. Check longest lyrics, three-line pages and dense scripture for wrapping, collision, clipping, soft shadows and stable anchors.
+- Logo is complete and uppercase, with its original transparent tip light and base shadow. Names are compact, aligned, each language one line, and readable. No decorative name icons. Footer remains low and independently editable.
+- Check cloud off, cloud on and two-line English subtitles in a QA copy. Confirm no dirty color blob, sharp edge, enlarged footer or collision with logo/copyright. Keep tested example subtitles out of final files unless requested.
+- Delete unused generic placeholders, preserving the intentional named subtitle field. Retain authentic QR codes/forms/photos and editable text.
 
-- [ ] Every slide is rendered individually at full size.
-- [ ] The **latest effective template** was inspected and used; no obsolete embedded master, footer, logo, or church-name artwork replaced it.
-- [ ] Backgrounds target `1920x920`, composed for `48:23`, and placed at `0,0,720,345`. Accepted nearby tool outputs have measured pixels, a recorded ratio error at most `0.1%`, and complete-image placement without cropping.
-- [ ] No background is shifted to negative Y or cropped by the native footer.
-- [ ] Every page has a content-appropriate visual direction within one coherent palette.
-- [ ] The **first slide** received the **highest visual scrutiny** and establishes a deliberate hierarchy, alignment grid, palette, and illustration language.
-- [ ] Important cover and vision text uses editable typography or **editable emphasis shapes**, not text baked into a bitmap.
-- [ ] The deck does not reuse one **dominant dark-purple block** across unrelated pages; deep plum remains a controlled accent or localized panel.
-- [ ] Reading areas are quiet and high contrast.
-- [ ] Essential text is positioned for **front-row sightlines**, normally in the upper or upper-middle content area rather than near the footer.
-- [ ] No title, paragraph, QR code, form, or photo overlaps another object or leaves the slide bounds.
-- [ ] Dense announcements remain readable from the sanctuary screen.
-- [ ] Formal scripture body is left-aligned `SimSun`, normally `36pt`, no larger than `36pt` under this profile, without text shadow or automatic shrinking. Any explicit user style override is recorded and checked against its effective values.
-- [ ] Every page of the same reading uses one body size; smaller single-slide exceptions were rendered and remain readable. Fixed source lines do not wrap; non-fixed input wraps only visually.
-- [ ] Scripture titles use left-aligned bold `Microsoft YaHei 28pt`; verse numbers use a separate `Microsoft YaHei 17pt` left column; the `KaiTi 20pt` right-aligned footer reference clears native identity content.
-- [ ] The scripture body uses the upper grid (`78,90,588,n*49+5pt`, normal line spacing `49pt`), normally two or three rendered lines and at most four. Additional lines paginate unless an explicit single-slide adjustment was rendered and verified clear of the protruding logo tip. `y=345pt` is not a safe text bottom. Any optional gold rule/outlined diamond is static and editable.
-- [ ] The PCCS logo tip sits over a uniform warm-ivory safe zone without a color blob.
-- [ ] The PCCS logo, Chinese church name, English church name, and purple footer are intact.
+## Structure and native PowerPoint
 
-## Structure
+- Each distinct scene has a unique layout Name and MatchingName; backgrounds are independent from foreground identity.
+- Perform 复制/edit/save/close/reopen on representative pages of every layout and both first/continuation lyric roles. Confirm background, Logo, footer, text font/size, cloud visibility and editability after reopening.
+- Run applicable validators. Worship final validator checks actual lyrics only; verify title/scripture/subtitles separately. Service COM QA uses `-Profile wide-v3` for the current bundle and `-Profile legacy` for older custom refined layouts. Faithful legacy layouts retain their original artwork and require checks against that original structure rather than the custom-background/tip-overlay script contract.
+- Compare source and final after a scoped revision. Never infer image generation provenance, alpha quality, aesthetic success or native duplication success from ZIP validity alone.
+- Keep the source and skill assets unchanged during project use. Deliver independent generated background originals and complete prompts when backgrounds were made. Report unperformed native/visual checks accurately.
 
-- [ ] Every distinct scene uses one custom layout with unique `Name` and `MatchingName`.
-- [ ] Each custom layout has one background and one exact `PCCS logo tip overlay`.
-- [ ] Background geometry is exactly `0,0,720,345pt`.
-- [ ] Text remains editable; the slide is not flattened into a screenshot.
-- [ ] No empty title, subtitle, date, footer, or slide-number placeholder remains.
-- [ ] Generated background assets are stored in the project workspace.
-- [ ] Speaker notes include `[Sources]` for externally sourced or generated assets when required by the presentation workflow.
-
-## PowerPoint Duplication Test
-
-When Microsoft PowerPoint is available:
-
-1. Duplicate at least one slide from every distinct custom layout.
-2. Edit visible text on each duplicate.
-3. Save, close, and reopen the QA copy.
-4. Confirm the correct background, footer, logo, logo-tip overlay, text style, and editable objects remain.
-5. Render the duplicates and inspect them.
-
-Use `scripts/qa_pccs_service_pptx.ps1` for structural checks and automated duplication. It copies the source to a new QA path before opening it, refuses source/existing-output replacement, and never quits the shared application or closes pre-existing presentations. A real visible character replacement must preserve text styles; after save/reopen, compare the edited text, fonts, geometry, and layout with the expected copy. Appending a space or an invisible marker does not demonstrate this.
-
-Pass `-ProjectJson PROJECT.json` to check actual named scripture bodies against the plan: exact characters and paragraphs (including full-width spaces), selected font and size, horizontal alignment, no unintended shadow, and no automatic shrinking. Validate the JSON first. For mixed decks, service records keep locally consecutive `index` values and use optional `final_slide_index` values for their actual positions; no lyric records are needed. The QA requires unique effective final indexes within the deck and consumes every declared service page, while structural, layout and duplication checks still cover the whole deck. This optional check does not verify the title, verse metadata boxes, reference, scripture source authenticity, or visual legibility; inspect those in the render. Without `-ProjectJson`, report that only structural and duplication QA ran. For mixed decks, select a `-BackgroundNamePattern` covering all intended custom backgrounds; do not mistake a naming-pattern mismatch for lost artwork. Layouts may belong to any master and are identified by master/layout index; distinct layouts must have unique `Name` and `MatchingName`.
-
-If PowerPoint is unavailable, report that limitation instead of marking the test passed.
-
-## In-Place Revisions
-
-- [ ] Preserve the original file as a clearly named backup.
-- [ ] Write the verified result to the user-requested path only after QA passes.
-- [ ] Re-run QA against the final path after replacement.
+Legacy-only geometry and tip-overlay checks are in [legacy-qa-checklist.md](legacy-qa-checklist.md); do not apply them to wide-v3.

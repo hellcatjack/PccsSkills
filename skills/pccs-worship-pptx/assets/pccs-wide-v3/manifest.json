@@ -1,0 +1,244 @@
+{
+  "profile": "wide-v3",
+  "reference": "../pccs-wide-v3.pptx",
+  "reference_sha256": "70fd81eccadb4e6100d32283fdd531ee73352fc933456f0df02cdc0394e18d5e",
+  "source_name": "20260920_PCCS_上传版64页_浅色留白背景v3.pptx",
+  "slide_count": 64,
+  "slide_size_pt": [
+    960,
+    540
+  ],
+  "representative_slides": [
+    1,
+    2,
+    9,
+    16,
+    17,
+    18,
+    44
+  ],
+  "layers": [
+    {
+      "file": "layers/subtitle-mist-current.png",
+      "source_part": "ppt/media/image6.png",
+      "sha256": "f4e940ec9b164f67bade2465cb95d910d83c4ae99abffa544f32dfa6c3a2183d",
+      "pixels": [
+        1800,
+        224
+      ],
+      "mode": "RGBA",
+      "powerpoint_alpha_multiplier": 1.0,
+      "note": "Current mist already stores its strength in PNG alpha; preserve bytes and do not add a second opacity adjustment."
+    },
+    {
+      "file": "layers/subtitle-mist-optional-base.png",
+      "source_part": "ppt/media/image7.png",
+      "sha256": "fd0981f110e7b3fba1285d6770a58f95170f72d121f1eb5356168957907c6515",
+      "pixels": [
+        2172,
+        724
+      ],
+      "mode": "RGBA",
+      "powerpoint_alpha_multiplier": 0.35,
+      "note": "Base RGBA PNG only. Apply 65% picture transparency (alpha multiplier 0.35) once to reproduce the optional layer; do not apply it twice."
+    },
+    {
+      "file": "layers/footer-decoration.png",
+      "source_part": "ppt/media/image8.png",
+      "sha256": "372246a283f5f203580ee63a5ba87e4c65e019731c8b4ad3c7d63b0f27e1cc80",
+      "pixels": [
+        1672,
+        941
+      ],
+      "mode": "RGBA"
+    },
+    {
+      "file": "layers/pccs-logo-complete.png",
+      "source_part": "ppt/media/image9.png",
+      "sha256": "87c842fbf1a8cc5d081df339fdc43316c4c70c2baf3ef0ba71f01e61525fdc60",
+      "pixels": [
+        1577,
+        997
+      ],
+      "mode": "RGBA"
+    }
+  ],
+  "source_slide_1_shapes": [
+    {
+      "name": "00_透明画布_尺寸基准",
+      "hidden": false,
+      "box_pt": [
+        0.0,
+        0.0,
+        960.0,
+        540.0
+      ],
+      "text": ""
+    },
+    {
+      "name": "05_淡紫字幕底色_透明渐变",
+      "hidden": false,
+      "box_pt": [
+        0.0,
+        430.0,
+        960.0,
+        110.0
+      ],
+      "text": ""
+    },
+    {
+      "name": "02_教会中文名称_单行",
+      "hidden": false,
+      "box_pt": [
+        104.0,
+        494.0,
+        174.0,
+        23.0
+      ],
+      "text": "匹兹堡南区基督教会"
+    },
+    {
+      "name": "03_Church name_单行",
+      "hidden": false,
+      "box_pt": [
+        104.0,
+        517.0,
+        166.5,
+        16.0
+      ],
+      "text": "Pittsburgh Christian Church South"
+    },
+    {
+      "name": "Copyright",
+      "hidden": false,
+      "box_pt": [
+        319.0,
+        508.4627,
+        632.0,
+        28.0
+      ],
+      "text": "词曲：余远淳 \nYenn Chwen Er\n© 2005 New Heart Music Ministries. All Rights Reserved. \n新心音乐事工版权所有"
+    },
+    {
+      "name": "同传英文字幕_第1行_28pt",
+      "hidden": false,
+      "box_pt": [
+        120.0,
+        420.35,
+        720.0,
+        69.7667
+      ],
+      "text": ""
+    },
+    {
+      "name": "Song footer",
+      "hidden": false,
+      "box_pt": [
+        634.0,
+        479.0,
+        314.0,
+        28.0
+      ],
+      "text": "荣耀的主"
+    },
+    {
+      "name": "Lyrics",
+      "hidden": false,
+      "box_pt": [
+        64.0,
+        105.0,
+        832.0,
+        250.0
+      ],
+      "text": "祢的创造奇妙 祢的能力无限\n祢的荣耀我们亲眼看见"
+    },
+    {
+      "name": "Song title",
+      "hidden": false,
+      "box_pt": [
+        64.0,
+        30.0,
+        832.0,
+        54.0
+      ],
+      "text": "荣耀的主"
+    },
+    {
+      "name": "Song title separator_金色细线",
+      "hidden": false,
+      "box_pt": [
+        432.0,
+        92.0,
+        96.0,
+        0.7
+      ],
+      "text": ""
+    },
+    {
+      "name": "字幕云雾_新模板当前设置_可单独隐藏",
+      "hidden": false,
+      "box_pt": [
+        0.0,
+        374.3,
+        960.0,
+        119.4667
+      ],
+      "text": ""
+    },
+    {
+      "name": "可选_字幕薄雾_65%透明_默认隐藏",
+      "hidden": true,
+      "box_pt": [
+        105.0,
+        374.0,
+        750.0,
+        112.0
+      ],
+      "text": ""
+    },
+    {
+      "name": "04_紫色薄雾与柔光_透明图层",
+      "hidden": false,
+      "box_pt": [
+        0.0,
+        250.0,
+        960.0,
+        290.0
+      ],
+      "text": ""
+    },
+    {
+      "name": "PCCS_完整Logo_新模板原件",
+      "hidden": false,
+      "box_pt": [
+        4.5,
+        475.75,
+        94.1139,
+        59.5
+      ],
+      "text": ""
+    },
+    {
+      "name": "固定前景_低底栏与教会标识_可取消组合编辑",
+      "hidden": false,
+      "box_pt": [
+        0.0,
+        0.0,
+        960.0,
+        540.0
+      ],
+      "text": "匹兹堡南区基督教会\nPittsburgh Christian Church South"
+    }
+  ],
+  "foreground_template": {
+    "file": "../pccs-wide-v3-foreground.pptx",
+    "sha256": "d452c65e803398047370f1da981fb744b8ab1565ba3e73da384a864b6141c4a7",
+    "slide_count": 1,
+    "upper_background": false,
+    "historical_song_text": false,
+    "preview": "foreground-default-mist-preview.png",
+    "historical_notes": false,
+    "current_subtitle_mist_visible": true,
+    "alternative_65percent_mist_visible": false
+  }
+}

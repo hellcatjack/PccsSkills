@@ -58,6 +58,7 @@ function Get-PccsSlideTextState {
     param($Slide, [switch]$IncludeText)
     $shapes = @()
     $layoutShapes = @()
+    $foregroundShapes = @()
     foreach ($shape in $Slide.CustomLayout.Shapes) {
         $layoutShapes += [ordered]@{
             Name = $shape.Name; Type = $shape.Type; Left = $shape.Left; Top = $shape.Top
@@ -65,6 +66,10 @@ function Get-PccsSlideTextState {
         }
     }
     foreach ($shape in $Slide.Shapes) {
+        $foregroundShapes += [ordered]@{
+            Name = $shape.Name; Type = $shape.Type; Left = $shape.Left; Top = $shape.Top
+            Width = $shape.Width; Height = $shape.Height; ZOrder = $shape.ZOrderPosition; Visible = $shape.Visible
+        }
         if (-not $shape.HasTextFrame -or -not $shape.TextFrame.HasText) { continue }
         $range = $shape.TextFrame2.TextRange
         $characters = @()
@@ -92,6 +97,7 @@ function Get-PccsSlideTextState {
         LayoutName = $Slide.CustomLayout.Name
         MatchingName = $Slide.CustomLayout.MatchingName
         LayoutShapes = $layoutShapes
+        ForegroundShapes = $foregroundShapes
         TextShapes = $shapes
     } | ConvertTo-Json -Depth 12 -Compress
 }

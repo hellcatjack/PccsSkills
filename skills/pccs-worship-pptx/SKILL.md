@@ -1,42 +1,36 @@
 ---
 name: pccs-worship-pptx
-description: Use when creating or revising PCCS worship PPTX decks from a template, service song list, V/C/B/End arrangements, lyric images, or YouTube sources, including lyric audit and editable slide verification.
+description: Use when creating or revising PCCS worship lyric PPTX decks, including song arrangements, lyric images, YouTube lyric sources, pale wide-screen backgrounds, layered subtitle templates, and background-only revisions.
 ---
 
 # PCCS Worship PPTX
 
-Build an audited, editable worship deck in the user's performance order. Use a supplied template, otherwise [assets/pccsworship.pptx](assets/pccsworship.pptx), and edit a project copy. Current instructions and already accepted revisions take priority over defaults.
+Build editable worship pages from the latest user template and accepted performance order. Use the **Presentations** skill for PPTX work. The default is [assets/pccs-wide-v3.pptx](assets/pccs-wide-v3.pptx), the current 960×540pt layered reference. Keep [assets/pccsworship.pptx](assets/pccsworship.pptx) for explicitly selected legacy work.
 
-Use **Presentations** for PPTX inspection, authoring, rendering, and verification. Use `pccs-service-pptx` for non-song pages in a mixed deck. Scripture uses its formal reading layout; the song typography rules below apply only to lyrics.
+## Select the task mode
 
-## Workflow and References
+- **Background-only revision:** use the exact uploaded deck, inspect background relationships and protected layers, and read [references/layered-template-v3.md](references/layered-template-v3.md). Replace only background media. Preserve text, all typography, page count/order, footer, Logo and cloud visibility. Do not redo lyric research, arrange songs or paginate. Extract exact existing text for source comparison and reuse existing audits when available.
+- **New lyrics or content changes:** read [references/input-contract.md](references/input-contract.md), [references/source-resolution.md](references/source-resolution.md), and [references/lyrics-pipeline.md](references/lyrics-pipeline.md). Resolve each recording; when 歌词图片 exist, use direct visual recognition as the baseline and recording as verification. If several recordings remain plausible, clarify the match. Complete `lyrics_audit.md` before `complete_lyrics.md`, then generate only from accepted text.
 
-1. Normalize chat, 歌词图片, links, and any TXT guide using [input-contract.md](references/input-contract.md). Run `scripts/validate_project.py PROJECT.json`.
-2. Match each song to a concrete recording or accepted source using [source-resolution.md](references/source-resolution.md). Actively locate official lyric materials and retain author/copyright details separately from lyrics. Record what was actually accessed.
-3. Follow [lyrics-pipeline.md](references/lyrics-pipeline.md): resolve section variants, audit wording, and fully expand the arrangement. Create `lyrics_audit.md`, then `complete_lyrics.md`, then slide data. The user's arrangement overrides the recording; clarify only a material ambiguity such as which verse an unnumbered `V` means. Reuse earlier answers.
-4. Run `scripts/validate_slide_data.py SLIDES.json`. Keep musical phrases intact. Repeated one-line endings such as `End*2` remain fully expanded but may share one page using consecutive `performance_indexes`, with one visible line per occurrence.
-5. Inspect the selected template, then author following [ppt-template-rules.md](references/ppt-template-rules.md) and [visual-style.md](references/visual-style.md). Preserve the native purple footer and exact PCCS identity, including the protruding logo tip. Each background layout needs a unique `Name` and `MatchingName`.
-6. Follow [qa-checklist.md](references/qa-checklist.md). Run `scripts/validate_final_pptx.mjs FINAL.pptx SLIDES.json` against actual editable runs and geometry. Render every slide and perform the PowerPoint 复制/edit/save/close/reopen test for every distinct layout. Keep the user's other open presentations intact.
+For either mode read [references/ppt-template-rules.md](references/ppt-template-rules.md), [references/visual-style.md](references/visual-style.md) and [references/qa-checklist.md](references/qa-checklist.md). A direct instruction or a newer uploaded template overrides the bundled design profile.
 
-## Current Production Defaults
+## New lyric/content authoring
 
-| Role | Typography and placement |
-|---|---|
-| Lyrics | Centered `KaiTi` **40pt**, fixed `50pt` line spacing; main block in the upper half |
-| First-song title | Centered `KaiTi` **44pt** |
-| Continuation song name | `KaiTi` **22pt**, right aligned in the purple footer |
-| Author/copyright | Editable `KaiTi` **9pt**, right aligned in the bottom purple bar, clear of church identity |
-| Formal scripture | Left aligned `SimSun` **36pt maximum**, uniform through a passage; heading `Microsoft YaHei` **28pt**, no lyric shadow |
+1. For new lyrics or content changes, validate normalized inputs with `scripts/validate_project.py`. A blank template selects the new wide-v3 asset relative to this skill. Copy it before editing. It contains sample songs: reuse representative layouts and replace historical lyrics, names and copyright for the new service. Background-only work follows its separate mode above and does not invoke the song-source project validator.
+2. Fully expand V/C/B/End arrangement. Keep `End*2` expanded as End End in complete lyrics; consecutive identical one-line endings may share one page with `performance_indexes`. Performance notes such as C2跳音 do not become lyrics.
+3. Use simplified Chinese and祢/祂 for newly authored lyrics per the audit. For fixed scripture from TXT, preserve canonical `source_lines` exactly. A background-only revision does not normalize authored text.
+4. Record `template_profile: wide-v3` in slide data: KaiTi40pt song titles, KaiTi52pt lyric body, SimSun scripture with explicit size. Legacy is KaiTi54pt/48pt. Set both Name and NameFarEast for the appropriate role; retain separate church-name fonts. Document user/template typography overrides rather than forcing bundled defaults.
+5. Keep lyrics to three lines maximum, preferably two complete musical phrases. Keep fixed size across lyric pages, no automatic shrinking, and top-align the first two-line body below the title.
+6. Design pale upper reading space, right-middle scenery, and simple natural gray-purple lower quarter. Never bake a solid purple bottom, Logo, text or subtitle cloud into the generated image. Read the detailed layer and prompt contract before generation.
+7. Run `scripts/validate_slide_data.py` and then `scripts/validate_final_pptx.mjs FINAL.pptx SLIDES.json` for content authoring. The final validator checks actual lyric runs, line count and shrinking against the chosen profile; title, scripture, footer and subtitles need separate visual/native checks.
+8. Render and review every affected page. Test Microsoft PowerPoint 复制/edit/save/reopen for each distinct layout. Check cloud off, cloud on, and two-line subtitle overlays in a QA copy. Preserve intentional empty subtitle fields; remove unused generic title/subtitle placeholders.
 
-The detailed coordinate grid is in `visual-style.md`. Set both `Name` and `NameFarEast`. Balance spacing, line length, and negative space before changing size; visual composition and congregational reading both matter.
+## Deliverables
 
-## Content and Delivery Gates
+For lyric authoring deliver an editable PPTX, `complete_lyrics.md`, and `lyrics_audit.md`. For background revisions deliver the revised PPTX and, when generating artwork, independent images and prompts. Preserve the source and report meaningful unperformed checks. Never overwrite skill assets during normal deck production.
 
-- Keep lyrics to at most three lines, with no lyric punctuation or automatic shrinking. The default first-page grid holds two lines. Paginate by musical phrase when it does not fit.
-- Keep **all copyright information in the purple bar**, never in the upper formal reading area.
-- For scripture, preserve canonical `source_lines`, punctuation, intentional spaces, and order. Never apply lyric punctuation or pronoun rules to scripture. Separate verse-number metadata only with an auditable source mapping. Prefer pagination over smaller type; retain the **36pt ceiling and left alignment**.
-- Official sources and permissions must be recorded; unverified OCR, ASR, or search snippets are not accepted final lyrics. Resolve uncertain text before producing the final deck.
-- No flattened text, hidden overflow, obscured identity, or empty title/subtitle placeholders.
-- Report any unavailable or expressly declined QA step accurately. A passing slide plan alone does not prove the final PPTX is correct.
+无上部背景的可复用模板已保存在 [assets/pccs-wide-v3-foreground.pptx](assets/pccs-wide-v3-foreground.pptx)，保留独立前景、完整Logo和可选字幕层。
 
-Deliver the final PPTX, `complete_lyrics.md`, `lyrics_audit.md`, and a source summary when external sources were used. Preserve the source and link the verified final file.
+默认显示当前字幕紫色云雾层，65%透明备选层保持隐藏；无上部背景模板也使用此默认设置。用户仍可在选择窗格中关闭云雾。
+
+Existing repository plans without template_profile keep the earlier refined40pt/44pt rules. Explicit legacy uses48pt/54pt; new work declares wide-v3. Existing verse reconstruction and attribution evidence are retained.

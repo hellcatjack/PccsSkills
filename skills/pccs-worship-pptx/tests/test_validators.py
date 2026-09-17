@@ -204,7 +204,8 @@ class ProjectValidatorTests(unittest.TestCase):
 
         self.assertEqual(0, result.returncode, result.stderr)
         summary = json.loads(result.stdout)
-        self.assertEqual("assets/pccsworship.pptx", summary["effective_template_pptx"])
+        self.assertEqual("assets/pccs-wide-v3.pptx", summary["effective_template_pptx"])
+        self.assertEqual("wide-v3", summary["template_profile"])
         self.assertEqual("skill_default", summary["template_source"])
 
     def test_user_template_overrides_bundled_default(self):

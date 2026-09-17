@@ -15,7 +15,7 @@ from scripture_contract import validate_verse_metadata
 
 ALLOWED_SOURCE_MODES = {"auto", "images", "youtube", "youtube_search"}
 ARRANGEMENT_TOKEN = re.compile(r"^[A-Za-z][A-Za-z0-9_-]*(?:\*[1-9]\d*)?$")
-DEFAULT_TEMPLATE_PPTX = "assets/pccsworship.pptx"
+DEFAULT_TEMPLATE_PPTX = "assets/pccs-wide-v3.pptx"
 
 
 def nonempty_list(value: Any) -> list[str]:
@@ -57,9 +57,9 @@ def validate(payload: Any) -> tuple[list[str], list[str], dict[str, Any]]:
     if requested_template is None or (
         isinstance(requested_template, str) and not requested_template.strip()
     ):
-        effective_template = DEFAULT_TEMPLATE_PPTX
+        effective_template = "assets/pccsworship.pptx" if project.get("template_profile") in {"legacy", "legacy-refined"} else DEFAULT_TEMPLATE_PPTX
         template_source = "skill_default"
-        default_template_path = Path(__file__).resolve().parents[1] / DEFAULT_TEMPLATE_PPTX
+        default_template_path = Path(__file__).resolve().parents[1] / effective_template
         if not default_template_path.is_file():
             errors.append(
                 f"Bundled default template is missing: {DEFAULT_TEMPLATE_PPTX}."
@@ -217,6 +217,7 @@ def validate(payload: Any) -> tuple[list[str], list[str], dict[str, Any]]:
         "scripture_count": len(scriptures),
         "effective_template_pptx": effective_template,
         "template_source": template_source,
+        "template_profile": project.get("template_profile", "wide-v3" if template_source == "skill_default" else "inspect_user_template"),
         "source_modes": dict(sorted(source_modes.items())),
         "warnings": warnings,
     }

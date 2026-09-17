@@ -2,11 +2,20 @@ param(
     [Parameter(Mandatory = $true)][string]$Deck,
     [string]$QaCopy = '',
     [string]$RenderDir = '',
-    [string]$BackgroundNamePattern = 'PCCS service background 48x23*',
-    [string]$ProjectJson = ''
+    [string]$BackgroundNamePattern = '',
+    [string]$ProjectJson = '',
+    [ValidateSet('wide-v3', 'legacy')][string]$Profile = 'wide-v3',
+    [switch]$NoUpperBackground
 )
 
 $ErrorActionPreference = 'Stop'
+$wide = $Profile -eq 'wide-v3'
+if ($NoUpperBackground -and -not $wide) { throw 'NoUpperBackground requires wide-v3.' }
+$expectedBackgrounds = if ($NoUpperBackground) { 0 } else { 1 }
+$slideWidth = if ($wide) { 960 } else { 720 }
+$slideHeight = if ($wide) { 540 } else { 405 }
+$backgroundHeight = if ($wide) { 540 } else { 345 }
+if (-not $BackgroundNamePattern) { $BackgroundNamePattern = if ($wide) { '背景_*_可独立替换' } else { 'PCCS service background 48x23*' } }
 . (Join-Path $PSScriptRoot 'qa_pccs_service_helpers.ps1')
 
 function Release-ComObject {
@@ -56,8 +65,8 @@ try {
     $app = New-Object -ComObject PowerPoint.Application
     $presentation = $app.Presentations.Open($QaCopy, $false, $false, $false)
 
-    Assert-Near $presentation.PageSetup.SlideWidth 720 'Slide width'
-    Assert-Near $presentation.PageSetup.SlideHeight 405 'Slide height'
+    Assert-Near $presentation.PageSetup.SlideWidth $slideWidth 'Slide width'
+    Assert-Near $presentation.PageSetup.SlideHeight $slideHeight 'Slide height'
 
     $layouts = @{}
     $serviceMap = if ($projectPlan) { Get-PccsServiceSlideMap $projectPlan $presentation.Slides.Count } else { @{} }
@@ -77,8 +86,8 @@ try {
             }
 
             if ($shape.Left -lt -0.1 -or $shape.Top -lt -0.1 -or
-                ($shape.Left + $shape.Width) -gt 720.1 -or
-                ($shape.Top + $shape.Height) -gt 405.1) {
+                ($shape.Left + $shape.Width) -gt ($slideWidth + 0.1) -or
+                ($shape.Top + $shape.Height) -gt ($slideHeight + 0.1)) {
                 $boundsProblems += "Slide $($slide.SlideIndex): $($shape.Name)"
             }
         }
@@ -117,22 +126,23 @@ try {
             }
         }
 
-        if ($backgrounds.Count -ne 1) {
+        if ($backgrounds.Count -ne $expectedBackgrounds) {
             throw "Layout '$layoutName' has $($backgrounds.Count) service backgrounds."
         }
-        if ($tips.Count -ne 1) {
+        if (-not $wide -and $tips.Count -ne 1) {
             throw "Layout '$layoutName' has $($tips.Count) PCCS logo tip overlays."
         }
         if ($placeholderCount -ne 0) {
             throw "Layout '$layoutName' has $placeholderCount unused placeholders."
         }
 
+        if ($NoUpperBackground) { continue }
         $background = $backgrounds[0]
         Assert-Near $background.Left 0 "Layout '$layoutName' background left"
         Assert-Near $background.Top 0 "Layout '$layoutName' background top"
-        Assert-Near $background.Width 720 "Layout '$layoutName' background width"
-        Assert-Near $background.Height 345 "Layout '$layoutName' background height"
-        if ($tips[0].ZOrderPosition -ne $layout.Shapes.Count) {
+        Assert-Near $background.Width $slideWidth "Layout '$layoutName' background width"
+        Assert-Near $background.Height $backgroundHeight "Layout '$layoutName' background height"
+        if (-not $wide -and $tips[0].ZOrderPosition -ne $layout.Shapes.Count) {
             throw "Layout '$layoutName' logo-tip overlay is not topmost."
         }
     }
@@ -151,6 +161,13 @@ try {
         $duplicate = $presentation.Slides.Item([int]$target).Duplicate().Item(1)
         $duplicate.Name = "QA duplicate source $target"
 
+        if ($NoUpperBackground) {
+            $probe = $duplicate.Shapes.AddTextbox(1, 64, 80, 500, 40)
+            $probe.Name = 'QA editable template probe'
+            $probe.TextFrame.TextRange.Text = 'Template copy test'
+            $probe.TextFrame.TextRange.Font.Name = 'KaiTi'
+            $probe.TextFrame.TextRange.Font.Size = 28
+        }
         $before = Get-PccsSlideTextState $duplicate
         Set-PccsVisibleQaEdit $duplicate
         $after = Get-PccsSlideTextState $duplicate
@@ -178,7 +195,7 @@ try {
             if ($shape.Name -like $BackgroundNamePattern) { $backgroundCount++ }
             if ($shape.Name -eq 'PCCS logo tip overlay') { $tipCount++ }
         }
-        if ($backgroundCount -ne 1 -or $tipCount -ne 1) {
+        if ($backgroundCount -ne $expectedBackgrounds -or (-not $wide -and $tipCount -ne 1)) {
             throw "Duplicate '$($slide.Name)' lost its background or PCCS logo tip overlay."
         }
         $actualState = Get-PccsSlideTextState $slide -IncludeText
@@ -197,7 +214,8 @@ try {
         Slides = $slideCount
         UniqueLayouts = $layouts.Count
         UniqueMatchingNames = $layouts.Count
-        BackgroundGeometry = 'PASS (0,0,720,345)'
+        Profile = $Profile
+        BackgroundGeometry = if ($NoUpperBackground) { 'NONE (foreground-only)' } else { "PASS (0,0,$slideWidth,$backgroundHeight)" }
         EmptySlidePlaceholders = $emptySlidePlaceholders
         ShapeBounds = 'PASS'
         FinalRenders = $slideCount

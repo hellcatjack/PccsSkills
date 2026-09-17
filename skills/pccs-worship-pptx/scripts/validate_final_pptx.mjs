@@ -5,6 +5,7 @@ import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import {validateLyricPage as validateWideLyricPage, validateFinalPptx as validateWideFinalPptx} from "./validate_wide_final_pptx.mjs";
 
 
 const PX_PER_PT = 4 / 3;
@@ -132,6 +133,10 @@ function checkSongFurniture(layout, page, slideNumber, typography) {
 
 
 export function validateLyricPage(layout, page, slideNumber, profile = {}) {
+  if (["wide-v3", "legacy"].includes(profile.template_profile)) {
+    const base = {lyric_font_pt:profile.template_profile === "wide-v3" ? 52 : 48, lyric_font:"KaiTi"};
+    return validateWideLyricPage(layout, page, slideNumber, {...base, ...profile});
+  }
   const typography = resolveTypography(profile);
   const requiredLyricPt = typography.lyric_font_pt;
   const expectedLines = Array.isArray(page?.lines) ? page.lines.map(String) : [];
@@ -252,6 +257,10 @@ function loadArtifactTool() {
 export async function validateFinalPptx(pptxPath, slideDataPath) {
   const { FileBlob, PresentationFile } = loadArtifactTool();
   const slideData = JSON.parse(fs.readFileSync(slideDataPath, "utf8"));
+  if (["wide-v3", "legacy"].includes(slideData.template_profile)) {
+    return validateWideFinalPptx(pptxPath, slideDataPath);
+  }
+  if (slideData.template_profile && slideData.template_profile !== "legacy-refined") throw new Error("Unknown template_profile");
   const typography = resolveTypography(slideData.typography);
   const pages = Array.isArray(slideData?.pages) ? slideData.pages : [];
   if (!pages.length) {

@@ -114,6 +114,18 @@ class QaSafetyTests(unittest.TestCase):
         if (-not $caught) {{ throw 'Out-of-deck service mapping passed.' }}
         """)
 
+    def test_reopen_snapshot_detects_subtitle_mist_visibility_drift(self):
+        helpers = str(HELPERS).replace("'", "''")
+        self.run_ps(f"""
+        . '{helpers}'
+        $mist=[pscustomobject]@{{Name='Subtitle mist';Type=13;Left=0;Top=374;Width=960;Height=119;Visible=-1;ZOrderPosition=1;HasTextFrame=0}}
+        $slide=[pscustomobject]@{{Shapes=@($mist);CustomLayout=[pscustomobject]@{{Name='Wide';MatchingName='Wide';Shapes=@()}}}}
+        $before=Get-PccsSlideTextState $slide
+        $mist.Visible=0
+        $after=Get-PccsSlideTextState $slide
+        if ($before -ceq $after) {{ throw 'Subtitle mist visibility change was absent from reopen snapshot.' }}
+        """)
+
     def test_final_scripture_checker_rejects_text_size_and_alignment_drift(self):
         self.assertTrue(HELPERS.is_file())
         helpers = str(HELPERS).replace("'", "''")

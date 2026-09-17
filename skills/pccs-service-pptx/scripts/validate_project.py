@@ -2,6 +2,7 @@
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -35,25 +36,27 @@ def require_nonempty_string(value, label):
         fail(f"{label} must be a non-empty string")
 
 
-def validate_background_measurement(record, label):
+def validate_background_measurement(record, label, wide=False):
     actual = record.get("background_actual_size_pixels")
     if actual is None:
         return
     if (not isinstance(actual, list) or len(actual) != 2
             or any(type(value) is not int or value <= 0 for value in actual)):
         fail(f"{label}.background_actual_size_pixels must be two positive integers")
-    if abs(actual[0] / actual[1] / (48 / 23) - 1) > 0.001:
-        fail(f"{label} background ratio differs from 48:23 by more than 0.1%; regenerate")
+    ratio, tolerance = (16/9, 0.01) if wide else (48/23, 0.001)
+    if abs(actual[0] / actual[1] / ratio - 1) > tolerance:
+        fail(f"{label} background ratio differs from the selected profile; regenerate")
     if actual != [1920, 920]:
         require_nonempty_string(record.get("background_size_audit"), f"{label}.background_size_audit")
 
 
-def validate_scripture_style(slide, passage_styles):
+def validate_scripture_style(slide, passage_styles, wide=False):
     label = f"slide {slide['index']} scripture"
     override = slide.get("style_override_reason")
     if override is not None:
         require_nonempty_string(override, f"{label}.style_override_reason")
-    size = slide.get("body_font_pt", 36)
+    maximum = 38 if wide else 36
+    size = slide.get("body_font_pt", maximum)
     if (isinstance(size, bool) or not isinstance(size, (int, float))
             or not math.isfinite(size) or size <= 0):
         fail(f"{label}.body_font_pt must be a finite positive number")
@@ -66,8 +69,8 @@ def validate_scripture_style(slide, passage_styles):
     if not isinstance(shadow, bool):
         fail(f"{label}.body_shadow must be boolean")
     if not override:
-        if size > 36:
-            fail(f"{label}.body_font_pt must be at most 36")
+        if size > maximum:
+            fail(f"{label}.body_font_pt must be at most {maximum} without a documented fit override")
         if font != "SimSun":
             fail(f"{label}.body_font defaults to SimSun; record an explicit user style override")
         if alignment != "left":
@@ -129,11 +132,19 @@ def validate_project(data):
     require_nonempty_string(project.get("service_date"), "project.service_date")
     require_nonempty_string(project.get("language"), "project.language")
 
-    if project.get("background_size_pixels") != "1920x920":
-        fail("project.background_size_pixels must be 1920x920")
-    if project.get("background_geometry_points") != [0, 0, 720, 345]:
-        fail("project.background_geometry_points must be [0, 0, 720, 345]")
-    validate_background_measurement(project, "project")
+    profile = project.get("template_profile", "legacy-refined")
+    if profile not in {"wide-v3", "legacy", "legacy-refined"}: fail("Unknown template_profile")
+    wide = profile == "wide-v3"
+    geometry = [0,0,960,540] if wide else [0,0,720,345]
+    if project.get("background_geometry_points") != geometry:
+        fail(f"project.background_geometry_points must be {geometry}")
+    if wide:
+        dimensions = re.fullmatch(r"([1-9]\d*)x([1-9]\d*)", str(project.get("background_size_pixels", "")))
+        if not dimensions or abs(int(dimensions[1])/int(dimensions[2])/(16/9)-1)>0.01:
+            fail("project.background_size_pixels must use native16:9 dimensions within1%")
+    elif project.get("background_size_pixels") != "1920x920":
+        fail("project.background_size_pixels must be1920x920 for legacy")
+    validate_background_measurement(project, "project", wide)
 
     slides = data.get("slides")
     if not isinstance(slides, list) or not slides:
@@ -157,7 +168,7 @@ def validate_project(data):
     for slide in slides:
         slide_index = slide["index"]
         slide_type = slide.get("type")
-        validate_background_measurement(slide, f"slide {slide_index}")
+        validate_background_measurement(slide, f"slide {slide_index}", wide)
         if slide_type == "lyrics":
             fail(f"slide {slide_index} type lyrics belongs to pccs-worship-pptx")
         if slide_type not in ALLOWED_TYPES:
@@ -182,7 +193,7 @@ def validate_project(data):
                 fail(f"slide {slide_index} scripture preserve_source_lines must be true")
             if "single_slide" in slide and not isinstance(slide["single_slide"], bool):
                 fail(f"slide {slide_index} single_slide must be boolean")
-            validate_scripture_style(slide, passage_styles)
+            validate_scripture_style(slide, passage_styles, wide)
             validate_verse_metadata(slide)
 
         if slide_type in ASSET_REQUIRED_TYPES:

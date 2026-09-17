@@ -11,6 +11,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 from scripture_contract import validate_verse_metadata
+from validate_wide_slide_data import validate as validate_wide
 
 
 LYRIC_PUNCTUATION = re.compile(r"[，。！？；：、,.!?;:\"'“”‘’（）()《》【】\[\]—…]")
@@ -26,6 +27,18 @@ def validate(payload: Any) -> tuple[list[str], dict[str, Any]]:
     errors: list[str] = []
     if not isinstance(payload, dict):
         return ["Slide data must be a JSON object."], {}
+
+    profile = payload.get("template_profile")
+    if profile in {"wide-v3", "legacy"}:
+        errors, summary = validate_wide(payload)
+        for group in ("scriptures", "pages"):
+            for index, record in enumerate(payload.get(group, []), 1):
+                if isinstance(record, dict) and (group == "scriptures" or record.get("role") == "scripture"):
+                    errors.extend(validate_verse_metadata(record, f"{group}[{index}]"))
+        summary["status"] = "fail" if errors else "pass"
+        return errors, summary
+    if profile not in {None, "legacy-refined"}:
+        return ["Unknown template_profile"], {"status": "fail"}
 
     typography = payload.get("typography", {})
     if not isinstance(typography, dict):

@@ -45,3 +45,10 @@ PowerPoint QA now opens only a newly created copy, refuses existing output paths
 Forward review found that requiring a service plan record for every final mixed-deck slide conflicted with the service-only input schema. A new bridge keeps `index` locally consecutive and adds optional `final_slide_index`; the QA maps only declared service pages, rejects duplicate/out-of-range positions, and verifies every declared page was consumed. Whole-deck structure, layouts and duplication remain covered. The new mapping tests first failed with seven assertions, then passed after implementation; the service suite now has **31 passing tests**.
 
 Forward review also identified that the fifth 49pt line in the default upper grid approached `y=340pt` and could overlap the protruding logo-tip bounds. The documentation now prefers two or three rendered lines, limits the default grid to four, and directs longer readings to paginate before any explicitly required single-slide geometry exception. It explicitly distinguishes `y=345pt` as the footer edge from a safe text boundary.
+
+
+## Wide-v3 integration
+
+The current 960×540pt reference and foreground template are included with original layered PNGs, image prompts and SHA256 manifest. Purple subtitle mist is visible by default; the65% alternative remains hidden. New52pt lyric/40pt title tests coexist with the earlier refined-projection checks. Existing source, verse reconstruction, attribution and native QA safeguards are retained.
+
+Publication verification: all 68 service tests and skill metadata validation passed. Native PowerPoint rendered the 64-slide reference and one-page foreground template. Copy/edit/save/reopen checks passed across five scene layouts and the foreground layout, including foreground visibility. Both declared scripture bodies passed native text, 38pt SimSun, left-alignment and no-shadow checks. Representative native renders were visually inspected.

@@ -18,7 +18,7 @@
 - Verify the translation/edition and verse boundaries against the user-supplied or authoritative source before treating numbers as verse metadata. A familiar-sounding passage is not evidence for silently correcting it.
 - To display verse numbers in a separate left column, retain the original `raw_source_lines`, exact removed `verse_prefixes`, separate `verse_numbers`, translation, and `verse_metadata_audit`. For every line, `verse_prefixes[i] + source_lines[i]` must exactly equal `raw_source_lines[i]`; keep body punctuation, spacing, characters, and line order unchanged. A supplied passage with no printed verse number can have an empty prefix and a verified metadata number; record how the boundary was established.
 - Do not add honorifics or apply lyric `祢/祂` substitution to scripture. Preserve the supplied edition's wording even when lyric pages use a different policy.
-- Preserve fixed lines; paginate at complete lines or verse boundaries where they coincide. For continuous input without fixed lines, wrapping is visual only and must preserve the character sequence. Prefer pagination to font reduction; the formal reading profile is `SimSun`, left-aligned, no shadow, one uniform size at or below `36pt` per passage.
+- Preserve fixed lines; paginate at complete lines or verse boundaries where they coincide. For continuous input without fixed lines, wrapping is visual only and must preserve the character sequence. Prefer pagination to font reduction; the formal reading profile is `SimSun`, left-aligned, no shadow, one uniform size per passage (`36pt` ceiling for legacy-refined; wide-v3 begins from the38pt sample and records explicit fit exceptions).
 
 ## QR Codes And Forms
 

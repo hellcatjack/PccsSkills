@@ -87,6 +87,8 @@ class SkillContractTests(unittest.TestCase):
         style = (SKILL_DIR / "references" / "visual-style.md").read_text(
             encoding="utf-8"
         )
+        self.assertIn("legacy-visual-style.md", style)
+        style += (SKILL_DIR / "references" / "legacy-visual-style.md").read_text(encoding="utf-8")
         style_terms = [
             "1920x920",
             "48:23",
@@ -106,6 +108,8 @@ class SkillContractTests(unittest.TestCase):
         checklist = (SKILL_DIR / "references" / "qa-checklist.md").read_text(
             encoding="utf-8"
         )
+        self.assertIn("legacy-qa-checklist.md", checklist)
+        checklist += (SKILL_DIR / "references" / "legacy-qa-checklist.md").read_text(encoding="utf-8")
         checklist_terms = [
             "1920x920",
             "48:23",
@@ -126,8 +130,8 @@ class SkillContractTests(unittest.TestCase):
         rule_terms = [
             "musical phrase",
             "breath",
-            "two lyric lines",
-            "actual rendered runs",
+            "preferably two",
+            "actual final runs",
             "44pt",
         ]
         missing_rules = [term for term in rule_terms if term not in template_rules]
@@ -137,9 +141,9 @@ class SkillContractTests(unittest.TestCase):
             encoding="utf-8"
         )
         checklist_terms = [
-            "validate_final_pptx.mjs",
-            "actual PPTX",
-            "pixel-identical",
+            "actual editable runs",
+            "exact pixel equivalence",
+            "package parts",
         ]
         missing_checklist = [
             term for term in checklist_terms if term not in checklist

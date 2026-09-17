@@ -1,4 +1,4 @@
 interface:
   display_name: "PCCS Service PPTX"
   short_description: "Create refined PCCS non-lyric weekly service slides"
-  default_prompt: "Use $pccs-service-pptx to create or revise an editable PCCS non-lyric service deck from my template, exact text, scripture, QR codes, forms, photos, and weekly announcements."
+  default_prompt: "Use $pccs-service-pptx to create or revise an editable PCCS non-lyric service deck from my supplied template or the bundled wide-v3 layered template, exact text, scripture, QR codes, forms, photos, and weekly announcements."

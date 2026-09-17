@@ -59,7 +59,7 @@ Performance annotations such as `跳音`, `轻唱`, `渐强`, or `男女轮唱` 
 
 Scripture supplied explicitly in a TXT or guide file is not processed like lyrics. Capture the source as ordered `source_lines` before pagination. Keep every source line intact and in the same position; do not merge short lines, split long lines, reorder phrases, or remove punctuation for visual balance.
 
-Only scripture-specific authorized corrections may change characters; audit them and preserve raw input. Carry canonical `source_lines` unchanged into the slide plan. If multiple pages are allowed, split between array items. Use the formal left-aligned service layout with a uniform body size at most `36pt`; if `single_slide: true`, solve fit within that ceiling without changing words or fixed lines.
+Only scripture-specific authorized corrections may change characters; audit them and preserve raw input. Carry canonical `source_lines` unchanged into the slide plan. If multiple pages are allowed, split between array items. Use the formal left-aligned service layout with a uniform body size chosen for the selected template (`36pt` ceiling for legacy-refined; wide-v3 uses the38pt sample or a documented fitting size); if `single_slide: true`, solve fit within that ceiling without changing words or fixed lines.
 
 ## Create `lyrics_audit.md`
 

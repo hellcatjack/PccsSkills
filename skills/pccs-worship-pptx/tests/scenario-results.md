@@ -69,3 +69,10 @@
 - 两个 Python 验证器：`py_compile` 通过
 
 这些测试验证规则和输入门槛，不替代实际项目中的 YouTube 访问、PPTX 全页渲染和 Microsoft PowerPoint 复制测试。
+
+
+## Wide-v3 integration
+
+The current 960×540pt reference and foreground template are included with original layered PNGs, image prompts and SHA256 manifest. Purple subtitle mist is visible by default; the65% alternative remains hidden. New52pt lyric/40pt title tests coexist with the earlier refined-projection checks. Existing source, verse reconstruction, attribution and native QA safeguards are retained.
+
+Publication verification: 55 Python tests and 22 JavaScript tests passed. Skill metadata validation passed. The actual 64-slide reference passed its final lyric audit (62 lyric pages, 52pt KaiTi). Native PowerPoint rendered all 64 pages and the one-page foreground template; copy/edit/save/reopen checks passed across all five scene layouts and the foreground layout, including layer visibility. Representative native renders were visually inspected.
