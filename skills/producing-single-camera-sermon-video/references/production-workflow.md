@@ -44,9 +44,11 @@ Write automatic timings only into a PPTX copy, close/reopen and verify saved pag
 
 Adjust native PPT **video timing only** for export rounding, and recheck animations on the final clock. Verify repeated-page backgrounds. Camera processing and PPT work can run independently when resources allow. Avoid simultaneous GPU ASR, neural denoising and heavy GPU encoding when they contend for memory.
 
+Do not treat QuickLook or a generic renderer as the reference for animated or layout-sensitive slides. Compare stable page states and frames through each animation against the native PowerPoint export; different font metrics, wrapping, backgrounds or effect timing require correction before delivery.
+
 ## 5. Compose, then mux
 
-Filter inputs: 0 native timed PPT video; 1 original picture source or processed panel; 2 duration-matched authentic cover clip. Map only `[outv]` into the visual intermediate. Panel mode does not re-crop or denoise input 1. Optional headings need a reviewed graph extension.
+Filter inputs: 0 native timed PPT video; 1 original picture source or processed panel; 2 duration-matched **static loop** of the authentic cover state. Do not loop the full PPT program as input 2; it can put a teaching slide into the ending cover. Map only `[outv]` into the visual intermediate. Panel mode does not re-crop or denoise input 1. Optional headings need a reviewed graph extension.
 
 Encode H.264, 1920×1080, CFR 30, `yuv420p`, SAR 1 and exactly `expectedFrames`. Start from reliable native/raw assets and a lossless or visually verified high-quality panel intermediate. Do not repeatedly transcode old deliverables. Probe the visual stream before mux.
 

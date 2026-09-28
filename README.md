@@ -16,6 +16,7 @@
 
 | Skill | 适用场景 | 主要交付 |
 | --- | --- | --- |
+| [`preparing-multiclip-sermon-master`](skills/preparing-multiclip-sermon-master/SKILL.md) | 多段机位素材按顺序拼接、首尾裁剪，并按需对齐独立录音及调音 | 时间轴与接缝验收、同步调音后的视频母版、审计记录 |
 | [`producing-single-camera-sermon-video`](skills/producing-single-camera-sermon-video/SKILL.md) | 横屏 4K 单机位牧师视频与本地 PPTX 合成，支持留白双栏、开头遮挡和牧师画面降噪 | 1920×1080/30 视频、语义 PPT 时间轴、可见片段降噪规划、已认可音轨码流复制与完整验证 |
 
 ### 音频与字幕
@@ -30,11 +31,10 @@
 
 每周讲道项目按实际素材选择需要的环节，不要求机械地运行全部 skill：
 
-1. 相机音频存在明显缺陷时，先用 `sermon-audio-restoration` 修复独立录音。
-2. 需要把独立录音写回视频时，用 `replacing-video-audio-track` 对齐并替换目标音轨。
-3. 用 `pccs-sermon-pptx` 美化讲道幻灯片，并完成结构与视觉 QA。
-4. 用 `producing-single-camera-sermon-video` 锁定已认可音轨，检查横屏 4K 构图，按可见范围裁切、缩放和处理牧师噪点，再与独立的原生 PPT 合成为讲道成片。
-5. 用 `sermon-chinese-subtitles` 对最终视频制作和校验简体中文字幕。
+1. 多段相机素材先用 `preparing-multiclip-sermon-master` 确定顺序、拼接接缝和首尾裁剪，再按需调用独立音轨替换与调音技能，交付一个已验证的视频母版。单段视频可直接进入对应音频阶段。
+2. 用 `pccs-sermon-pptx` 美化讲道幻灯片，并完成结构与视觉 QA。
+3. 用 `producing-single-camera-sermon-video` 锁定已认可音轨，检查横屏 4K 构图，按可见范围裁切、缩放和处理牧师噪点，再与独立的原生 PPT 合成为讲道成片；需要时在留白区域加入核对过的教会标识与讲道信息。
+4. 用 `sermon-chinese-subtitles` 对最终视频制作和校验简体中文字幕。
 
 敬拜歌词页与其他主日礼仪页分别使用 `pccs-worship-pptx` 和 `pccs-service-pptx`；混合式主日 PPT 应保留两套 skill 各自的可编辑版式，再进行组合。
 

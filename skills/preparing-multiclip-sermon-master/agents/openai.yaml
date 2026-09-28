@@ -1,0 +1,4 @@
+interface:
+  display_name: "准备多片段讲道视频母版"
+  short_description: "拼接裁剪多段机位视频，并同步独立录音与调音"
+  default_prompt: "Use $preparing-multiclip-sermon-master to prepare one verified sermon video master from ordered camera clips and, when requested, aligned external audio and loudness treatment."

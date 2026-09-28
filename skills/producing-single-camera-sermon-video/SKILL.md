@@ -1,6 +1,6 @@
 ---
 name: producing-single-camera-sermon-video
-description: Use when producing a sermon from a fixed-camera pastor recording with finalized embedded audio and a local PPTX, especially landscape 4K footage, inset PPT/pastor layouts, camera-only denoising, opening camera exclusions, repeated slides, or semantic animation timing.
+description: Use when producing a sermon from a fixed-camera recording with finalized embedded audio and a local PPTX, especially landscape 4K footage, inset PPT/pastor layouts, camera-only denoising, semantic slide timing, or requested branding in unused margins.
 ---
 
 # Produce a Single-Camera Sermon Video
@@ -9,7 +9,7 @@ Let the complete sermon and PPT determine every page, animation and composition 
 
 ## Scope and defaults
 
-- Future PCCS capture defaults to **landscape 4K**, normally 3840×2160. Probe actual dimensions, rotation, frame timestamps, color and audio; 4K does not imply 30 fps, SDR or sharp focus. Default delivery remains 1920×1080 H.264, constant 30 fps, AAC.
+- Future PCCS capture defaults to **landscape 4K**, normally 3840×2160. Probe actual dimensions, rotation, frame timestamps, color and audio; 4K does not imply 30 fps, SDR or sharp focus. Default delivery remains 1920×1080 H.264, constant 30 fps, with the accepted master's audio codec copied unchanged when supported.
 - Use `presentations:Presentations` before reading, modifying, rendering or validating PPTX. Preserve native PowerPoint animations and their trigger relationships.
 - Explicit user choices override layout/processing defaults. Carry forward accepted audio, synchronization tolerances and selected layouts. Do not reopen a millisecond sync adjustment the user has declined. Acceptance is not proof of mathematically zero offset.
 - Preserve source files and previous formal outputs. Work under the requested date directory's `_work`; deliver a new, clearly named file in that date directory.
@@ -35,7 +35,7 @@ The input video's audio stream is the sole authoritative formal audio. Record it
 7. Build the graph with `scripts/build_dynamic_filter.py`. Its inset path supports original camera input or a processed panel on the complete timeline; never crop a processed panel twice. Encode the visual program once, then stream-copy locked audio without `-shortest`.
 8. Apply [verification-contract.md](references/verification-contract.md) to the exact candidate. Correct failures and rerun affected checks. Deliver only after every applicable gate has fresh evidence.
 
-For long jobs and GPT-6 behavior, read [gpt6-execution.md](references/gpt6-execution.md): independent work while tools run, durable checkpoints, scope-aware steering and tool-based measurements. For requested titles, descriptions or thumbnails, read [publication-assets.md](references/publication-assets.md).
+For multiple camera files, head/tail trimming or an external recording, first use `preparing-multiclip-sermon-master` to produce one verified finished master. This Skill starts only after that master is locked. For optional church identity or sermon information in unused margins, read [branding-overlays.md](references/branding-overlays.md). For long jobs and GPT-6 behavior, read [gpt6-execution.md](references/gpt6-execution.md). For requested titles, descriptions or thumbnails, read [publication-assets.md](references/publication-assets.md).
 
 ## Delivery
 

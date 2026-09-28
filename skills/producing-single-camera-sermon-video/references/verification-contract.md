@@ -4,7 +4,7 @@ A formal output passes only with fresh evidence for every applicable item, tied 
 
 ## Media, clock and source roles
 
-1. Probe MP4/H.264, 1920×1080, CFR 30, SAR 1, `yuv420p`, AAC, expected channels/color and program start zero.
+1. Probe MP4/H.264, 1920×1080, CFR 30, SAR 1, `yuv420p`, expected channels/color and program start zero. The audio codec must match the locked master by stream copy; AAC and ALAC are both possible when the selected container supports them.
 2. Confirm `videoFrames == expectedFrames == round(duration*30)`; inspect all frame timestamps for CFR and cumulative drift, not only the average-rate metadata.
 3. Compare video/audio/container durations with the locked audio. Each difference must be within one frame. Never use `-shortest` to hide a mismatch.
 4. Run a full decode with FFmpeg `-xerror`; require zero exit status and no decode errors.
@@ -29,6 +29,7 @@ If exact identity cannot be established, fail this gate and diagnose the mismatc
 6. Inspect pastor framing across representative posture/gesture extremes, even for a fixed camera. Preserve recorded lectern detail and intended gestures without inventing unrecorded objects. Check the crop and uniform scaling against the plan.
 7. Check `left-cover-right-pastor` before/during/after the final cover transition, throughout prayer and near the last frame. Preserve the complete tail.
 8. Re-listen to all low-confidence semantic boundaries and record the decision. A number computed from ASR cannot replace that review.
+9. If branding was added, inspect every information phase, all overlay fade boundaries, full-screen slide passages and the ending. Confirm the overlays occupy only unused margins, show only approved content, leave the slide/pastor picture clear, and preserve the final audio packet identity.
 
 ## Denoising and visual comparison
 
