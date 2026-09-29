@@ -22,6 +22,8 @@ Use at most three lyric lines, preferably two when musical phrasing supports it.
 
 Scripture preserves exact supplied source_lines and punctuation. Each fixed source line is one paragraph; paginate only between lines. If single_slide is true, choose the largest fitting scripture size without changing those boundaries. When user allows up to two pages, set single_slide false and document a maximum of two; this is not a blanket permission for other projects.
 
+For a one-slide passage with separate verse-number shapes, keep consecutive verses on a consistent row grid above the subtitle area. If cloning a number shape in PowerPoint, explicitly reset both `Left` and `Top`: `Duplicate()` can offset the new shape. Match the visible digit baseline to the Chinese body after rendering; identical shape tops do not guarantee optical alignment when fonts or sizes differ. Check that the longest verse stays on its intended row and that no orphaned character wraps beneath it.
+
 Use stable upper anchors and top-align two-line first pages. Song title, lyrics, identity and subtitles must not overlap. Preserve the subtle short title separator when present, without adding ornaments to the church-name block.
 
 ## Structure and QA

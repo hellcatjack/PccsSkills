@@ -4,11 +4,13 @@
 
 Resolve the exact lyric text and one concrete reference performance for each song. A channel or playlist URL identifies a search space, not automatically the recording to use.
 
-## Scripture From Service Guides
+## Service Guides And Scripture
+
+When a service guide is a DOCX, inspect its visible paragraphs and the underlying `word/document.xml` before normalizing content. Paragraph text returned by a high-level library can miss text nested in content controls or other Word structures; collect the `w:t` runs within each `w:p` in document order and compare the result with the visible document. Keep song order, scripture placement, and performance notes distinct from lyric text. A playlist linked in the guide establishes candidate recordings; verify the individual video titles and order against the guide and score images.
 
 When the user explicitly includes scripture in a TXT or guide file, that file is the authoritative source for scripture wording and line sequence. Capture the passage as an ordered line array before layout work. Do not use web copies, OCR, ASR, or remembered Bible formatting to merge, split, reorder, paraphrase, or re-punctuate those lines.
 
-Apply only scripture-specific authorized character corrections and record each change. Song normalization rules do not change scripture quotations. If standardizing verse labels, check boundaries against the selected Bible edition, keep the raw source, and record the corrected metadata separately.
+Apply only scripture-specific authorized character corrections and record each change. Keep the original quoted lines alongside the revised, accepted `source_lines`; regenerate the audit, complete lyrics, slide plan, and PPTX together so the files agree. Song normalization rules do not change scripture quotations. If standardizing verse labels, check boundaries against the selected Bible edition, keep the raw source, and record the corrected metadata separately.
 
 ## With Lyric Images
 

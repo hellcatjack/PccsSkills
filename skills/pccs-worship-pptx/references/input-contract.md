@@ -65,7 +65,7 @@ At least one source must exist per song: an image, YouTube URL, audio file, offi
       "id": "scripture-1",
       "position": "before_song_2",
       "reference": "诗篇 62:5-8",
-      "source_file": "guide.txt",
+      "source_file": "guide.docx",
       "source_lines": [
         "我的心哪，你当默默无声，专等候神，",
         "因为我的盼望是从他而来。"
@@ -86,10 +86,11 @@ At least one source must exist per song: an image, YouTube URL, audio file, offi
 
 When the request explicitly includes scripture, normalize it into `source_lines` before slide planning:
 
-- For a TXT or guide file, read each physical scripture line in order. Do not replace the array with one continuous `text` string.
-- Preserve the number, order, and boundaries of those lines. Only an explicitly required project-wide text policy may change characters within a line; record such changes in the audit and never move text across a line boundary.
+- For a TXT or guide file, read each physical scripture line in order. For DOCX, verify the extracted paragraph text against the visible document before deciding the verse boundaries. Do not replace the array with one continuous `text` string.
+- Preserve the number, order, and boundaries of those lines. Change characters only under an explicit applicable text policy or a scripture-specific user correction; record such changes in the audit and never move text across a line boundary.
+- A later user correction to the quotation is also authoritative: keep the original extraction as raw evidence, put the authorized wording in `source_lines`, and record the before/after in the audit. Do not let song-specific simplification or punctuation removal alter scripture.
 - Keep scripture punctuation and intentional spacing. Lyric punctuation removal applies only to song lyrics.
-- Set `single_slide: true` only when the user explicitly requires the whole passage on one slide.
+- Set `single_slide: true` when the user explicitly requests the whole passage on one slide and the tested layout fits. Honor `position` in the final page order, including a passage inserted between two performances of the same song; count section instances without counting the scripture page as a song section.
 - Copy the same scripture records into the slide plan's top-level `scriptures` array. Every scripture page must reference one record through `scripture_id`.
 
 Example slide-plan page:

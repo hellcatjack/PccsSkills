@@ -57,9 +57,11 @@ Performance annotations such as `跳音`, `轻唱`, `渐强`, or `男女轮唱` 
 
 ## Preserve Scripture Lines
 
-Scripture supplied explicitly in a TXT or guide file is not processed like lyrics. Capture the source as ordered `source_lines` before pagination. Keep every source line intact and in the same position; do not merge short lines, split long lines, reorder phrases, or remove punctuation for visual balance.
+Scripture supplied explicitly in a TXT or guide file is not processed like lyrics. Capture the source as ordered `source_lines` before pagination. Keep every source line intact and in the same position; do not merge short lines, split long lines, reorder phrases, or remove punctuation for visual balance. If the user later edits quotation marks or other characters, retain the raw extraction, update the accepted `source_lines`, and record the authorized delta before regenerating dependent artifacts.
 
 Only scripture-specific authorized corrections may change characters; audit them and preserve raw input. Carry canonical `source_lines` unchanged into the slide plan. If multiple pages are allowed, split between array items. Use the formal left-aligned service layout with a uniform body size chosen for the selected template (`36pt` ceiling for legacy-refined; wide-v3 uses the38pt sample or a documented fitting size); if `single_slide: true`, solve fit within that ceiling without changing words or fixed lines.
+
+For a dense single-slide passage, first use the available reading area and consistent verse spacing, then choose the largest uniform font that keeps each fixed verse readable and clear of the subtitle cloud. Keep verse numbers in a separate, editable gutter when the source provides verified verse boundaries. Avoid empty rows between consecutive verses. Render the slide at presentation size: digits and Chinese body text can have different visual ascenders even when their text boxes share a `Top` value. Align the visible digit baselines with the text by eye and recheck after save/reopen.
 
 ## Create `lyrics_audit.md`
 
