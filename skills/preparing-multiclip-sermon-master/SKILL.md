@@ -17,6 +17,12 @@ Produce one verified video master whose picture timeline and audio are final. Ke
 6. Probe and fully decode the final master. Verify ordered camera frames, each seam, exact requested trims, picture packet identity across audio-only stages, audio/video end difference within one frame, final audio alignment across the sermon, requested loudness/peak targets, and all source hashes. Write an audit with measured values, commands, evidence paths, and explicit pass/fail results.
 7. Hand the verified master to `producing-single-camera-sermon-video` when slides or composition are requested. That downstream Skill copies the master's audio packets unchanged.
 
+## Decoder and frame-clock preflight
+
+Before a full intermediate encode, test the actual decoder/encoder command at the first retained frames, each file join and the final frames. A hardware decoder can fail on leading B-frames or accept a command that produces diagnostic errors; require the expected decoded frames and clean error output as well as exit status. Use software decode as the reference and fall back to it when hardware output cannot be verified. An unsupported hardware pixel-format option is a command failure, not evidence of damaged source media.
+
+Inspect every prepared video packet's PTS/DTS and duration, including the final packet. Hardware encoder output can have a zero final duration or irregular first step despite plausible average fps. Diagnose container timing separately from picture content; a justified timestamp-table repair must preserve the intended frame mapping, picture payloads and decoded continuity, then pass the complete master checks again. When converting 30000/1001 to 30 fps, derive and test the source-frame mapping from the actual timestamp/rounding policy; do not substitute a guessed nearest-source-frame formula.
+
 ## Stops
 
 Stop on uncertain source order, an unexplained timestamp discontinuity, material audio drift, a seam that loses speech or frames, or a failed dedicated audio verification. Keep provisional outputs under the work directory and do not label them as a finished master.

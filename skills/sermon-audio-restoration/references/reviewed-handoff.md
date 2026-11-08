@@ -21,3 +21,9 @@ Use a small task-specific Python driver under `_work` with the installed skill's
 8. Only after all checks pass, allocate a non-existing formal path, promote the candidate, verify the final file with the same master/baseline arguments, and report its hash. Preserve original media, prior outputs, plan/review evidence and the master. If verification fails, keep the candidate under `_work` and resolve the specific failure.
 
 This route is exercised by the skill's reviewed-handoff test on synthetic audio. It does not prove that any real sermon has been listened to or that an optional restoration backend is available. The actual task still needs its own review and media evidence.
+
+## Persist acceptance and freeze the encoded handoff
+
+Record a user's A/B response against the exact reviewed master, plan, baseline and process-result hashes. An earlier report may correctly say review was pending; a later hash-bound acceptance record resolves that state without rerunning restoration or changing measured results. If the user first reports a problem and then clarifies that the sound is acceptable, retain the sequence and final decision. An image-only edit does not reopen accepted audio.
+
+Choose the final audio codec deliberately before the downstream lock. The remux helper above uses the established AAC path; do not claim it creates ALAC. When a project chooses a container-supported lossless ALAC handoff, a separate task-specific driver must meet the same sample-count, latency, edge-gain, loudness, picture-preservation and full-decode contract. Verify decoded PCM against the intended quantized master, accounting for its explicit bit depth. Freeze the resulting encoded stream and record its ordered complete packet-payload hash, packet count, timestamps and stream metadata. Downstream composition maps that same verified video's audio with `-c:a copy`; it must not re-encode the accepted WAV or substitute PCM equality for encoded packet identity.

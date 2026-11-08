@@ -11,6 +11,12 @@ A formal output passes only with fresh evidence for every applicable item, tied 
 5. Verify `pictureSourceVideo` provenance and frame mapping against the accepted master at beginning/middle/end and any cuts. Different take, source fps or start offset cannot be accepted merely because durations resemble each other.
 6. Verify a processed panel's dimensions, complete frame count, timebase, no-audio state, chunk core/context ranges and absolute-index assembly. Hidden placeholders must never enter a positive-opacity pastor frame.
 
+### Decoder clocks and color repairs
+
+Require clean decoder error output as well as zero exit status and expected frame count; an unsupported hardware-acceleration option must not be mistaken for a successful full decode. Check every decoded presentation timestamp and frame duration on the final file, including the tail. A timestamp-only observer in the same strict decode can avoid a second full decode. If using FFmpeg `wrapped_avframe`/framehash for that observer, its opaque payload checksum is not a decoded-pixel hash; use only its verified clock fields for this purpose.
+
+For intended BT.709 SDR, check primaries, transfer, matrix and limited range in the actual output, including applicable H.264 VUI and MP4 `colr` tags. If picture samples are correct and only tags are missing, prefer a metadata-only stream-copy repair over another visual encode. Record before/after metadata and exact video/audio payload and timing comparisons. Where SPS/PPS are changed or injected, verify their configuration and separately prove non-parameter picture NAL identity; do not describe changed parameter bytes as fully identical packets. Audio still requires complete exact packet identity. Give the repaired candidate a new hash and rerun final-file media/audio/integrity checks plus affected decode/visual checks against that file.
+
 ## Audio identity
 
 Compare selected input-video audio packets with final audio packets: the audio packet hash must match exactly, including payload order and packet count. No PCM-hash fallback is permitted: decoded equality alone does not prove stream copy.
@@ -39,10 +45,16 @@ In the final composite, compare visible pastor viewports with the selected proce
 
 For quantitative comparisons, align crop, resolution, SAR and colorspace first. Convert both images consistently **before** downscaling; RGB-versus-YUV scaling can otherwise create misleading errors. Record thresholds and rationale before judging results. Investigate mismatches; do not lower thresholds merely to pass. A wall-patch noise reduction is a local measurement, not a whole-video sharpness score.
 
+Use native exported slide PNGs as an independent page reference, not only the same composition routine that generated the candidate. Compare PPT and the visible processed pastor separately in addition to any whole-frame score. Include every transition frame, every repeated native page instance, source joins, processed-core entries/exits, posture extremes and the last displayed frame. Use verified global timestamps when a decoder/filter may reset local frame indexes. Inspect the worst-scoring actual frames; movement during a zoom can lower the whole-frame metric without explaining a stable-slide or pastor mismatch.
+
+Distinguish the evidence's scope: sparse contact sheets support visual judgment, complete per-frame numerical comparisons cover transition continuity, and processed-panel closeups show the reference rather than the encoded final pane. Record which images were actually viewed; generated-but-unopened files are not manual review. Preserve optical softness, clipped highlights, foreground obstructions and edge-reaching gestures as observed limitations rather than claiming detail recovery or perfect framing.
+
 ## Integrity and report
 
 Recompute hashes for all source media, source PPTX and protected prior formal outputs against baseline. Record native render and selected panel hashes when those become verification references. Preserve originals and previous versions.
 
 Write JSON with each check's expected/measured values, evidence path, candidate hash and `PASS`, `FAIL` or `REVIEW_REQUIRED`; use `NOT_APPLICABLE` only with a supported reason (for example, a deck proven to contain no animations). Cast library scalars into real JSON values. Missing evidence or any required failure blocks final promotion.
+
+When combining reports from different tools, explicitly map their documented schemas: a report with `passed: true` is not necessarily one with `status: PASS`. Require the expected evidence and mandatory checks; never treat a missing/unknown status as success. Keep raw reports and the schema mapping. Bind current technical, visual, decoded-clock and manual-review gates to the same final candidate hash before promotion.
 
 After a repair, rerun affected visual/semantic gates and all final-file media/audio/integrity gates when encoding or mux changed. Once the exact candidate passes, do not repeat unrelated checks or rerender the sermon for a metadata-only change.

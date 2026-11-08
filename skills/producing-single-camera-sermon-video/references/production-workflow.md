@@ -52,6 +52,8 @@ Filter inputs: 0 native timed PPT video; 1 original picture source or processed 
 
 Encode H.264, 1920×1080, CFR 30, `yuv420p`, SAR 1 and exactly `expectedFrames`. Start from reliable native/raw assets and a lossless or visually verified high-quality panel intermediate. Do not repeatedly transcode old deliverables. Probe the visual stream before mux.
 
+Preflight the real hardware/software pipeline on a short output spanning a hidden/visible panel join. Check decoded continuity, frame durations and all intended color fields. Encoder flags are requests: VideoToolbox can emit a BT.709 matrix while omitting primaries or transfer tags. The final bitstream/container, rather than the command line, determines acceptance; see the repair rules in [verification-contract.md](verification-contract.md).
+
 In the final mux, map the audio stream from the same input video locked as `audioSourceVideo`:
 
 ```powershell
@@ -63,3 +65,5 @@ Preserve metadata/disposition explicitly where needed and audit the actual comma
 ## 6. Verify and promote
 
 Run the complete [verification contract](verification-contract.md) on the immutable candidate. Numerical checks and visual/semantic review can run independently against that same file. A changed candidate invalidates affected evidence. Promote only after every gate passes and report its exact hash. An older report cannot certify a new encode.
+
+Save a final manual-review record identifying the images actually opened, whether each came from the candidate or a processed reference, observations and remaining source limits. Reconcile earlier pending-work messages by linking the completed gates without erasing their historical measurements. Allocate a new formal path and hash it after promotion; a same-filesystem hardlink is an optional way to avoid duplicating a large verified candidate. It must never overwrite an existing formal output.

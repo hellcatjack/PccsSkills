@@ -6,6 +6,8 @@ Inspect actual metadata and frames near the beginning, middle, end, page transit
 
 Choose one fixed crop; avoid tracking, digital pans and side changes. Remove irrelevant wall/aisle before reducing gesture space. Check headroom, eye line, body scale, microphone clearance and visual balance at native output size. Scale uniformly: crop and panel aspect ratios must match.
 
+Review a source-pose contact sheet before committing to long neural processing, including the widest left/right gestures and the closing prayer. Keep the pastor's normal position near the pane center while allowing movement inside the source crop; do not shrink an already requested large PPT to fix an avoidable crop choice. Inspect the entire pastor pane for framing: a face-detail QA crop can cut a hand that is still present in the full pane. If an extreme gesture reaches or passes the actual pane edge, record that timestamp and judge the crop honestly; do not report that every fingertip remains visible. An actual camera repositioning needs a separately planned segment, overriding the fixed-camera assumption for that source interval.
+
 ## Default starting preset: landscape inset A
 
 For a 1920×1080 canvas and 16:9 slides:
@@ -38,5 +40,7 @@ Model every repeated page instance. After prayer, choose the page appropriate to
 ## Ending and previews
 
 Choose the return-to-cover boundary from the last summary, appeal or closing prayer without interrupting an explanation. Default `left-cover-right-pastor` crossfades only the PPT viewport and preserves the pastor through the complete audio tail. A requested different ending needs an explicit plan and adapted verification; the bundled filter implements this default.
+
+If the authentic cover is already active during the final testimony or appeal, an ending crossfade between identical cover states may correctly have no visible PPT change. Verify the spoken boundary, footer phase and complete pastor/audio tail instead of forcing a redundant page change.
 
 For a new layout, make an actual full-frame composition preview and short transition sample. If the user asks to choose, prepare concrete alternatives before asking. Otherwise proceed within existing authorization. Prior approval carries forward, while new footage still needs framing inspection. Do not re-ask about the same approved layout because encoding or denoising changed.

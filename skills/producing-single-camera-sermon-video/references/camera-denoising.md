@@ -30,15 +30,24 @@ For a five-frame model followed by a centered nine-frame temporal filter, contex
 
 Record actual frames/second, memory peak, startup time and expected total work after warm-up. Inspect motion for trails, ghost faces, skin smoothing, waxy hands, flicker and edge loss. A flat-wall noise statistic can support a local result; it cannot establish whole-frame sharpness or overall improvement. Do not explore many expensive full-resolution variants after a clear acceptable candidate is found.
 
+Keep several consecutive source/selected frame pairs for each motion sample, including moving fingers, face turns and lectern edges. Isolated attractive stills do not reveal temporal smearing. A stronger noise setting that makes skin or hands waxy loses even when its wall statistic improves; preserve the chosen recording-specific strength and the reason for rejecting stronger settings.
+
 ## Runtime and reuse
 
 - Use an isolated environment; record dependency versions, model hashes and device/provider. Check the actual execution provider and a small inference profile; an installed GPU package is not proof of GPU execution. Verify CUDA/cuDNN compatibility using [ONNX Runtime CUDA documentation](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html).
 - Test FP16 against a FP32 sample before using it. Where implementing FastDVDnet's staged pipeline, cache overlapping first-stage results and confirm cached outputs match the uncached graph on a test clip. Fall back visibly if the backend cannot meet quality or memory needs.
+- On Apple silicon, fixed-shape Core ML with FP16 input/output and cached overlapping first-stage inference is a tested optimization to benchmark. Compare it against the trusted FP32 implementation before use, declaring acceptable pixel error in advance. Record compute-unit configuration separately from measured device utilization; `CPU_AND_NE` alone does not prove every operation ran on the Neural Engine. Measure end-to-end decode/inference/encode throughput, not just warm inference speed.
 - Keep the source decoder, rolling inference buffers and silent panel encoder streaming. Avoid writing all 4K frames to disk or keeping the sermon in RAM. Do not run competing GPU ASR and denoising jobs merely to claim parallelism.
 - Cache by picture-source hash, frame mapping, global frame ranges, crop, scale/color operations, model/weight hashes, precision, parameters and context policy. A layout/crop change invalidates dependent camera results; a title/description edit does not.
 - Save each completed chunk atomically with frame count, range, hash and decode result. Resume only validated matching chunks. A nonempty output file or an encoder progress value is not completion evidence.
 
+Record the available decode window separately from the frames actually consumed by the model. Carry real temporal neighbors across source-file and processing-core boundaries; a larger available window is not proof that the model used the required context. Keep the global output clock continuous across all cores.
+
 Use a lossless or visually verified high-quality panel intermediate and encode the final composite once. In `cameraInput.mode: processed-panel`, the panel has the exact declared dimensions, complete timeline and no audio; the compositor must not crop or denoise it again.
+
+Make hidden placeholders and processed cores agree on dimensions, pixel format and SAR. Parameter changes at their joins can reinitialize FFmpeg filters and reset local frame counter `n`; select verification frames by the independently verified global PTS/timebase. Suppressing filter reinitialization is appropriate only after proving the actual decoded format is constant. Test selection across a real join before a full verification run.
+
+Budget disk for both chunk files and their assembled panel. If space requires retiring generated duplicates, first fully decode and verify the assembled descendant and prove each core's picture identity. H.264 concatenation may inject SPS/PPS: distinguish verified parameter-set changes from picture NAL changes, retaining timestamps, hashes and the retirement record. Never weaken audio packet identity, delete originals/accepted audio, or remove a chunk still needed by a running consumer.
 
 ## Required evidence
 
