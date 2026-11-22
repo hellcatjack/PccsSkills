@@ -10,7 +10,7 @@ import pytest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-from compose_weekly_pptx import NS, Package, TEMPLATE, shape, xml
+from compose_weekly_pptx import NS, Package, TEMPLATE, resolve, shape, tag, xml
 from replace_layout_background import swap_background
 
 
@@ -89,3 +89,18 @@ def test_public_template_has_no_weekly_private_payload():
             if part.endswith(".rels"):
                 assert all(item.get("TargetMode") != "External" for item in xml(deck.read(part)))
         assert list(xml(deck.read("docProps/core.xml"))) == []
+
+
+def test_bulletin_uses_bundled_qr_without_picture_override(tmp_path):
+    output = run_composer(tmp_path, "bulletin", [
+        {"template": "bulletin"}, {"template": "gallery"}, {"template": "poster"},
+    ])
+    package = Package(output)
+    embedded = []
+    for part, name in zip(package.slides, ["bulletin-qr", "gallery-1", "poster"], strict=True):
+        image = shape(xml(package.parts[part]), name, "pic")
+        rid = image.find("p:blipFill/a:blip", NS).get(tag("r", "embed"))
+        rel = package.find_relationship(package.rels(part), rid)
+        embedded.append(package.parts[resolve(part, rel.get("Target"))])
+    assert embedded[0] == TEMPLATE.with_name("bulletin-qr.png").read_bytes()
+    assert embedded[0] != embedded[1] == embedded[2]

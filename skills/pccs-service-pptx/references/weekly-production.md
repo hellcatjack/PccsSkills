@@ -1,12 +1,12 @@
 # 主日崇拜整套 PPTX
 
-[720×405 pt 原生周次模板](../assets/pccs-weekly-720.pptx) 来自 2026-11-22 v5 的已验证版式。它保留开场、三套歌词场景、西奈旷野经文、家讯、周报、欢迎、三图回顾、竖版海报、三一颂和祷告的版式、PCCS 前景及字幕图层。歌词、引用、二维码、当周照片、海报、讲道及伴奏由当次项目提供。只需该模板的视觉风格时，无需重新生成背景。
+[720×405 pt 原生周次模板](../assets/pccs-weekly-720.pptx) 来自 2026-11-22 v5 的已验证版式。它提供使命与异象开场、家讯报告、欢迎、[原版线上周报二维码](../assets/bulletin-qr.png)、三套歌词场景、西奈旷野经文背景及祷告、三图回顾、竖版海报、三一颂版式。PCCS 标识、底栏、背景和字幕图层可分别编辑。每周提供新歌词、经文和讲道原稿。按流程补入当周活动照片、说明、海报和伴奏。
 
 ## 从资料到完整主日流程
 
 1. 确认周次、当前完整 PPTX、当周歌单、讲道与家讯原稿。上周完整 PPTX 是顺序和视觉参考。用本周已确认素材更新每一项，并保持绝对页码、歌曲段落位置与源文件对应。用户给出完整新版本时从该版续修。
 2. 按 [敬拜歌词流程](../../pccs-worship-pptx/references/lyrics-pipeline.md) 校对曲目、谱面和录音版本。依次展开串烧回接、重复的 B 段和尾句，分别写出每遍。新增经文放在用户指定的歌曲或段落之后。确认安排和内容，再分页。
-3. 在完整主日稿中通常按开场、敬拜与插入经文、讲道、家讯及结束项目排页，以当次流程为准。若讲道原样并入，选原稿讲道页加入。将上周的历史活动资料换成本周的原二维码、照片及海报。二维码留足白边，从导出画面解码比对。相册按照片实际方向适配，海报完整等比例显示。
+3. 在完整主日稿中通常按开场、敬拜与插入经文、讲道、家讯及结束项目排页，以当次流程为准。若讲道原样并入，选原稿讲道页加入。周报页默认沿用模板内的二维码，用户提供更新时换入新码。二维码留足白边，从导出画面解码比对。相册按照片实际方向适配，海报完整等比例显示。按本周内容取用活动回顾和海报版式。
 4. 渲染成品。逐页比内容、页序、同一布局的元素位置，保留的讲道页与原稿在同一投影尺寸渲染比对。对变动版式在桌面 PowerPoint 测试复制、改字、保存、重开，并检查字幕云雾开关。发生渲染器差异时，明确哪项检查用的是什么渲染器。
 5. 后续修订从最近验证版另存新版本。用户有意压缩经文、调整 B 段或只换背景时，逐一局部修改并核对其他页。用户需要 PDF 时从同一最终 PPTX 导出。
 
@@ -36,12 +36,12 @@ python scripts/compose_weekly_pptx.py assets/weekly-plan.example.json demo.pptx
 | `path-first` / `path-lyrics` | 同上，使用晨光小径场景 |
 | `scripture` | `Scripture title`、`Scripture body`、`Scripture footer` |
 | `announcements` / `welcome` / `prayer` | `Announcement title` / `Welcome title` / `Prayer title` |
-| `bulletin` | `Online bulletin title`，图片 `bulletin-qr` |
+| `bulletin` | `Online bulletin title`，图片 `bulletin-qr` 已嵌入既定二维码 |
 | `gallery` | `Serving report title`、`Serving report subtitle`，图片 `gallery-1`、`gallery-2`、`gallery-3` |
 | `poster` | 图片 `poster` |
 | `doxology` | `Doxology title`、`Doxology lyrics` |
 
-背景和图片嵌入 PPTX。二维码、画廊和海报原型使用中性占位图。实际交付逐项确认均已填入本周素材。需要现场可暂停／续播伴奏时，按 [离线音频与祷告](../../pccs-worship-pptx/references/audio-and-prayer.md) 添加 `audio_cues`。
+背景和图片嵌入 PPTX。`{"template":"bulletin"}` 可直接生成完整周报页。仅在换码时提供 `pictures.bulletin-qr`。歌词、经文和三一颂正文使用可编辑占位文字，画廊与海报使用中性占位图。交付前检查所有采用的页面已填入当周内容。需要现场可暂停／续播伴奏时，按 [离线音频与祷告](../../pccs-worship-pptx/references/audio-and-prayer.md) 添加 `audio_cues`。
 
 ## 经文容量和换图
 
@@ -58,4 +58,4 @@ python scripts/replace_layout_background.py current.pptx new-background.png revi
 
 Windows 桌面 PowerPoint 可运行 `scripts/export_weekly_pdf.ps1 -Pptx final.pptx -Pdf final.pdf`。其他平台用桌面 PowerPoint 的 PDF 导出，或用可用的同类渲染器导出并复查字形和媒体。核对每页一张幻灯片、总页数及关键页渲染。PDF 是静态投影版，现场伴奏使用 PPTX 放映。
 
-验证现版的私有周次资料留在周次工作区。公共仓库只提交可复用的原型、通过清理的品牌元素、背景、代码及无个人资料的示例。
+共享技能包保留可复用的版式、PCCS 品牌元素、背景及线上周报二维码。每周的歌词、经文、讲道和具体活动内容在周次工作区补入。

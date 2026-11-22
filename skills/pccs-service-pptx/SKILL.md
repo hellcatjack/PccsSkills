@@ -7,7 +7,7 @@ description: Use when creating or revising PCCS non-lyric service PPTX pages, in
 
 Create editable PCCS 非歌词 service slides, including封面、家讯、经文、欢迎页、二维码和礼仪页面. Use **Presentations** for PPTX work and `pccs-worship-pptx` for song lyrics and sequencing. Mixed decks preserve both systems.
 
-For a complete weekly deck matching the current combined format, use the [weekly production workflow](references/weekly-production.md) and [720×405 pt template](assets/pccs-weekly-720.pptx). This path covers the opening, lyrics, inserted scripture, unstyled sermon import, current announcements, targeted background replacements and PDF export. It is separate from the 960×540 pt standalone design default below.
+For a complete weekly worship deck, default to the [weekly production workflow](references/weekly-production.md) and [720×405 pt template](assets/pccs-weekly-720.pptx) unless the user supplies a different template. Reuse the opening, announcements, welcome, [existing bulletin QR](assets/bulletin-qr.png), backgrounds and editable page layouts. Fill in each week's supplied lyrics, scripture, sermon, and any activity updates.
 
 ## References
 
@@ -18,7 +18,7 @@ For a complete weekly deck matching the current combined format, use the [weekly
 
 ## Workflow
 
-1. Use the latest supplied template; otherwise copy [assets/pccs-wide-v3.pptx](assets/pccs-wide-v3.pptx). This is the 64-page design reference; use its scripture pages16/17 or adapt another representative page, replacing historical content and removing unused pages. [assets/pccsworship.pptx](assets/pccsworship.pptx) remains the explicit legacy option.
+1. For standalone design work, use the latest supplied template or copy [assets/pccs-wide-v3.pptx](assets/pccs-wide-v3.pptx). This is the 64-page design reference; use its scripture pages16/17 or adapt another representative page, replacing historical content and removing unused pages. [assets/pccsworship.pptx](assets/pccsworship.pptx) remains the explicit legacy option.
 2. Inspect slide size, every relevant page, master/layout, picture relation, identity group and cloud visibility. Distinguish a background-only revision from content/layout work. For background-only work preserve all text, fonts, order, positions and non-background media; replace only designated background image parts.
 3. For new content normalize and run `scripts/validate_project.py`. Supply `template_profile: wide-v3`, 16:9 background dimensions and `background_geometry_points: [0,0,960,540]`. Keep all supplied wording and canonical scripture lines unchanged. Condense scripture to one page only when requested; use two if the user allows it and one becomes too small.
 4. Use pale upper reading space and right-middle subjects. Keep the lower quarter simple natural gray-purple texture, with no solid purple block or extra cloud painted into the image. Fresh redraws start from complete prompts with no old-image input. Keep the independent foreground #E7DFED footer, complete PCCS Logo and editable church names.

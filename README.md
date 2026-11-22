@@ -46,7 +46,7 @@
 
 已安装旧版时，在更新前保留自己的修改。也可以[下载仓库 ZIP](https://github.com/hellcatjack/PccsSkills/archive/refs/heads/main.zip)，把三个技能目录完整复制到 Codex 的技能目录，通常是用户目录下的 `.codex/skills`。
 
-在新会话里调用 `$pccs-service-pptx`，要求使用 [720×405 pt 周次模板](skills/pccs-service-pptx/assets/pccs-weekly-720.pptx) 生成整套主日崇拜 PPT，并提供当周歌单、原始讲道、家讯素材、经文及播放顺序。若是重现已制作周次，使用同一份已审核歌词和原始资料。模板包含 15 个原生版式原型，包括当前的西奈旷野经文背景。
+在新会话里调用 `$pccs-service-pptx`，要求使用 [720×405 pt 周次模板](skills/pccs-service-pptx/assets/pccs-weekly-720.pptx) 生成整套主日崇拜 PPT，并提供当周歌词与顺序、经文、讲道原稿及有更新的活动资料。模板的 15 个可编辑原型内置开场、家讯报告、欢迎页、[线上周报原版二维码](skills/pccs-service-pptx/assets/bulletin-qr.png)、西奈旷野等背景、教会标识和字幕图层。活动照片、说明及海报提供可填充版式。
 
 [跨平台生成、换背景与 PDF](skills/pccs-service-pptx/references/weekly-production.md) · [嵌入伴奏与祷告暂停](skills/pccs-worship-pptx/references/audio-and-prayer.md)
 

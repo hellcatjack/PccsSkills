@@ -20,6 +20,10 @@
       }
     },
     {"template": "announcements"},
-    {"template": "welcome"}
+    {"template": "bulletin"},
+    {"template": "welcome"},
+    {"template": "gallery"},
+    {"template": "poster"},
+    {"template": "doxology"}
   ]
 }
