@@ -1,0 +1,25 @@
+{
+  "slides": [
+    {"template": "opening"},
+    {
+      "template": "water-first",
+      "name": "示例诗歌",
+      "text": {
+        "Song title": "示例诗歌",
+        "Lyrics": ["这里填写第一行歌词", "这里填写第二行歌词"],
+        "Song footer": "示例诗歌",
+        "Copyright": ["词曲署名", "版权信息"]
+      }
+    },
+    {
+      "template": "scripture",
+      "text": {
+        "Scripture title": "经文出处",
+        "Scripture footer": "经文出处",
+        "Scripture body": ["1 第一节经文。\n此处演示节内换行。", "2 第二节经文。"]
+      }
+    },
+    {"template": "announcements"},
+    {"template": "welcome"}
+  ]
+}

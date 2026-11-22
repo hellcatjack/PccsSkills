@@ -7,6 +7,8 @@ description: Use when creating or revising PCCS non-lyric service PPTX pages, in
 
 Create editable PCCS 非歌词 service slides, including封面、家讯、经文、欢迎页、二维码和礼仪页面. Use **Presentations** for PPTX work and `pccs-worship-pptx` for song lyrics and sequencing. Mixed decks preserve both systems.
 
+For a complete weekly deck matching the current combined format, use the [weekly production workflow](references/weekly-production.md) and [720×405 pt template](assets/pccs-weekly-720.pptx). This path covers the opening, lyrics, inserted scripture, unstyled sermon import, current announcements, targeted background replacements and PDF export. It is separate from the 960×540 pt standalone design default below.
+
 ## References
 
 - [references/input-contract.md](references/input-contract.md): exact weekly input and template profile.

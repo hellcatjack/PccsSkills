@@ -7,6 +7,8 @@ description: Use when creating or revising PCCS worship lyric PPTX decks, includ
 
 Build editable worship pages from the latest user template and accepted performance order. Use the **Presentations** skill for PPTX work. The default is [assets/pccs-wide-v3.pptx](assets/pccs-wide-v3.pptx), the current 960×540pt layered reference. Keep [assets/pccsworship.pptx](assets/pccsworship.pptx) for explicitly selected legacy work.
 
+For a complete worship service matching the 720×405 pt weekly format, use the [weekly production workflow](../pccs-service-pptx/references/weekly-production.md) with `pccs-service-pptx`. Use the [offline audio and prayer workflow](references/audio-and-prayer.md) when a supplied recording should start with the song, pause on a prayer page, and resume on the next slide.
+
 ## Select the task mode
 
 - **Background-only revision:** use the exact uploaded deck, inspect background relationships and protected layers, and read [references/layered-template-v3.md](references/layered-template-v3.md). Replace only background media. Preserve text, all typography, page count/order, footer, Logo and cloud visibility. Do not redo lyric research, arrange songs or paginate. Extract exact existing text for source comparison and reuse existing audits when available.

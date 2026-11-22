@@ -9,6 +9,8 @@ description: Use when revising a PCCS weekly sermon PPTX for video, especially w
 
 Beautify an existing weekly sermon deck as an editable PowerPoint for video. The cover establishes the illustration language; continuous scripture and sermon pages share one typographic grid. Preserve the sermon as authored.
 
+If a weekly worship request calls for the pastor's slides to remain as authored, use the [weekly assembly workflow](../pccs-service-pptx/references/weekly-production.md) to bring in the original sermon pages and compare their projection renders.
+
 Use the **Presentations** skill for every PPTX inspection, edit, render, and verification task. Do not use subagents in this workflow.
 
 When the cover is visibly soft at the target video size, use **imagegen** as a strict edit target and preserve its basic composition.

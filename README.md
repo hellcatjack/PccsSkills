@@ -38,6 +38,18 @@
 
 敬拜歌词页与其他主日礼仪页分别使用 `pccs-worship-pptx` 和 `pccs-service-pptx`；混合式主日 PPT 应保留两套 skill 各自的可编辑版式，再进行组合。
 
+### 在另一台电脑上安装并复现敬拜 PPT
+
+在 Codex 中输入下面这段话即可安装公开仓库中的三个技能：
+
+> 请用 $skill-installer 从 GitHub 仓库 hellcatjack/PccsSkills 的 main 分支安装 skills/pccs-worship-pptx、skills/pccs-service-pptx 和 skills/pccs-sermon-pptx，保留各自的 assets、references 和 scripts。
+
+已安装旧版时，在更新前保留自己的修改。也可以[下载仓库 ZIP](https://github.com/hellcatjack/PccsSkills/archive/refs/heads/main.zip)，把三个技能目录完整复制到 Codex 的技能目录，通常是用户目录下的 `.codex/skills`。
+
+在新会话里调用 `$pccs-service-pptx`，要求使用 [720×405 pt 周次模板](skills/pccs-service-pptx/assets/pccs-weekly-720.pptx) 生成整套主日崇拜 PPT，并提供当周歌单、原始讲道、家讯素材、经文及播放顺序。若是重现已制作周次，使用同一份已审核歌词和原始资料。模板包含 15 个原生版式原型，包括当前的西奈旷野经文背景。
+
+[跨平台生成、换背景与 PDF](skills/pccs-service-pptx/references/weekly-production.md) · [嵌入伴奏与祷告暂停](skills/pccs-worship-pptx/references/audio-and-prayer.md)
+
 ### 横屏 4K 制作约定
 
 - 默认拍摄为横屏 4K，交付仍为 1080p/30；每次实测帧率、色彩和时间轴，不假定所有 4K 都是 30 fps SDR。
